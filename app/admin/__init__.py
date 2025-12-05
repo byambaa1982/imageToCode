@@ -1,0 +1,8 @@
+# app/admin/__init__.py
+"""Admin blueprint."""
+
+from flask import Blueprint
+
+admin = Blueprint('admin', __name__)
+
+from app.admin import routes
