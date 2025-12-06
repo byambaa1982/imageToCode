@@ -179,7 +179,7 @@ class CreditsTransaction(db.Model):
     
     # Description
     description = db.Column(db.String(500))
-    metadata = db.Column(db.JSON)
+    extra_data = db.Column(db.JSON)  # Renamed from 'metadata' to avoid SQLAlchemy conflict
     
     # Timestamp
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
@@ -213,8 +213,8 @@ class Order(db.Model):
     stripe_session_id = db.Column(db.String(255))
     payment_method_type = db.Column(db.String(50))
     
-    # Metadata
-    metadata = db.Column(db.JSON)
+    # Extra data for storing additional payment information
+    extra_data = db.Column(db.JSON)  # Renamed from 'metadata' to avoid SQLAlchemy conflict
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
