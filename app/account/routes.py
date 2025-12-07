@@ -5,6 +5,25 @@ from flask import render_template, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from app.account import account
 from app.models import Conversion
+from app.extensions import db
+
+
+@account.route('/dev/verify-email')
+@login_required
+def dev_verify_email():
+    """Development route to quickly verify email."""
+    if current_app.config.get('ENV') == 'production':
+        flash('This feature is not available in production.', 'error')
+        return redirect(url_for('account.dashboard'))
+    
+    if current_user.email_verified:
+        flash('Your email is already verified!', 'info')
+    else:
+        current_user.email_verified = True
+        db.session.commit()
+        flash('✅ Email verified successfully for development!', 'success')
+    
+    return redirect(url_for('account.dashboard'))
 
 
 @account.route('/dashboard')

@@ -21,4 +21,12 @@ def make_celery(app):
                 return self.run(*args, **kwargs)
     
     celery.Task = ContextTask
+    
+    # Auto-discover tasks
+    celery.autodiscover_tasks([
+        'app.tasks.conversion_tasks',
+        'app.tasks.email_tasks', 
+        'app.tasks.analytics_tasks'
+    ])
+    
     return celery

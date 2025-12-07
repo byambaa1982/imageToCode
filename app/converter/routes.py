@@ -1,35 +1,367 @@
 # app/converter/routes.py
 """Converter routes."""
 
-from flask import render_template, redirect, url_for, flash
+import os
+import uuid
+from datetime import datetime, timedelta
+
+from flask import (
+    render_template, redirect, url_for, flash, request, 
+    jsonify, current_app, send_file, abort
+)
 from flask_login import login_required, current_user
+
 from app.converter import converter
+from app.converter.forms import UploadForm, FeedbackForm
+from app.converter.utils import (
+    validate_image_file, 
+    save_uploaded_file,
+    cleanup_temp_files
+)
+from app.extensions import db
+from app.models import Conversion, ConversionFeedback
+from app.tasks.conversion_tasks import (
+    process_screenshot_conversion,
+    get_conversion_status,
+    retry_failed_conversion
+)
 
 
-@converter.route('/upload')
+@converter.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
     """Upload page."""
-    if not current_user.email_verified:
-        flash('Please verify your email address before converting screenshots.', 'warning')
-        return redirect(url_for('account.dashboard'))
+    # Temporarily disabled for development - re-enable for production
+    # if not current_user.email_verified:
+    #     flash('Please verify your email address before converting screenshots.', 'warning')
+    #     return redirect(url_for('account.dashboard'))
     
     if not current_user.has_credits():
         flash('You have no credits remaining. Please purchase more credits.', 'warning')
         return redirect(url_for('payment.pricing'))
     
-    return render_template('converter/upload.html')
+    form = UploadForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Validate uploaded file
+            is_valid, error_msg = validate_image_file(form.screenshot.data)
+            if not is_valid:
+                flash(f'Invalid file: {error_msg}', 'error')
+                return render_template('converter/upload.html', form=form)
+            
+            # Generate conversion UUID
+            conversion_uuid = str(uuid.uuid4())
+            
+            # Save uploaded file
+            success, file_path, error_msg = save_uploaded_file(form.screenshot.data, conversion_uuid)
+            if not success:
+                flash(f'Failed to save file: {error_msg}', 'error')
+                return render_template('converter/upload.html', form=form)
+            
+            # Create conversion record
+            conversion = Conversion(
+                uuid=conversion_uuid,
+                account_id=current_user.id,
+                original_image_url=file_path,
+                original_filename=form.screenshot.data.filename,
+                framework=form.framework.data,
+                css_framework=form.css_framework.data,
+                status='pending',
+                ip_address=request.remote_addr
+            )
+            
+            db.session.add(conversion)
+            
+            # Deduct credits
+            try:
+                current_user.deduct_credits(1.0, f'Conversion {conversion_uuid}')
+                current_app.logger.info(f'Deducted 1 credit from user {current_user.id} for conversion {conversion_uuid}')
+            except ValueError as e:
+                db.session.rollback()
+                flash('Insufficient credits. Please purchase more credits.', 'error')
+                return redirect(url_for('payment.pricing'))
+            
+            db.session.commit()
+            
+            # Start background processing (for Phase 2, we'll call directly)
+            # In production, this should be a proper Celery task
+            try:
+                from app.tasks.conversion_tasks import process_screenshot_conversion
+                # For now, call directly (TODO: make async in production)
+                import threading
+                thread = threading.Thread(target=process_screenshot_conversion, args=[conversion_uuid])
+                thread.daemon = True
+                thread.start()
+                
+                current_app.logger.info(f'Started conversion processing for {conversion_uuid}')
+            except Exception as e:
+                current_app.logger.error(f'Failed to start conversion processing: {str(e)}')
+                db.session.rollback()
+                # Refund the credit
+                current_user.add_credits(1.0, f'Refund for failed conversion start {conversion_uuid}')
+                flash('Failed to start conversion. Please try again.', 'error')
+                return redirect(url_for('converter.upload'))
+            
+
+            
+            # Redirect to processing page
+            flash('Your screenshot has been uploaded successfully! Processing will begin shortly.', 'success')
+            return redirect(url_for('converter.processing', conversion_uuid=conversion_uuid))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f'Error in upload route: {str(e)}')
+            flash('An error occurred while processing your upload. Please try again.', 'error')
+            
+            # Cleanup uploaded file if it exists
+            if 'file_path' in locals() and file_path:
+                cleanup_temp_files([file_path])
+    
+    return render_template('converter/upload.html', form=form)
 
 
 @converter.route('/processing/<conversion_uuid>')
 @login_required
 def processing(conversion_uuid):
-    """Processing page."""
-    return render_template('converter/processing.html', conversion_uuid=conversion_uuid)
+    """Processing page with real-time status updates."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        flash('Conversion not found.', 'error')
+        return redirect(url_for('account.dashboard'))
+    
+    # If already completed, redirect to result
+    if conversion.status == 'completed':
+        return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+    
+    return render_template('converter/processing.html', 
+                         conversion=conversion,
+                         conversion_uuid=conversion_uuid)
 
 
 @converter.route('/result/<conversion_uuid>')
 @login_required
 def result(conversion_uuid):
-    """Result page."""
-    return render_template('converter/result.html', conversion_uuid=conversion_uuid)
+    """Result page showing generated code."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        flash('Conversion not found.', 'error')
+        return redirect(url_for('account.dashboard'))
+    
+    if conversion.status != 'completed':
+        if conversion.status == 'failed':
+            flash('Conversion failed. You can retry or contact support.', 'error')
+        else:
+            return redirect(url_for('converter.processing', conversion_uuid=conversion_uuid))
+    
+    # Check if files have expired
+    if conversion.expires_at and conversion.expires_at < datetime.utcnow():
+        flash('This conversion has expired. Files are no longer available.', 'warning')
+        return redirect(url_for('account.dashboard'))
+    
+    feedback_form = FeedbackForm()
+    
+    return render_template('converter/result.html', 
+                         conversion=conversion,
+                         feedback_form=feedback_form)
+
+
+@converter.route('/api/status/<conversion_uuid>')
+@login_required
+def api_conversion_status(conversion_uuid):
+    """API endpoint to get conversion status."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        return jsonify({'error': 'Conversion not found'}), 404
+    
+    # Get detailed status
+    status_data = get_conversion_status(conversion_uuid)
+    
+    return jsonify(status_data)
+
+
+@converter.route('/api/retry/<conversion_uuid>', methods=['POST'])
+@login_required
+def api_retry_conversion(conversion_uuid):
+    """API endpoint to retry failed conversion."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        return jsonify({'error': 'Conversion not found'}), 404
+    
+    if conversion.status != 'failed':
+        return jsonify({'error': 'Conversion is not in failed state'}), 400
+    
+    if conversion.retry_count >= 3:
+        return jsonify({'error': 'Maximum retry attempts exceeded'}), 400
+    
+    try:
+        # Start retry task
+        from app.tasks.conversion_tasks import retry_failed_conversion
+        import threading
+        thread = threading.Thread(target=retry_failed_conversion, args=[conversion_uuid])
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Retry started'
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f'Error retrying conversion {conversion_uuid}: {str(e)}')
+        return jsonify({'error': 'Failed to start retry'}), 500
+
+
+@converter.route('/download/<conversion_uuid>')
+@login_required
+def download_conversion(conversion_uuid):
+    """Download generated code package."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        flash('Conversion not found.', 'error')
+        return redirect(url_for('account.dashboard'))
+    
+    if conversion.status != 'completed':
+        flash('Conversion is not ready for download.', 'error')
+        return redirect(url_for('converter.processing', conversion_uuid=conversion_uuid))
+    
+    if not conversion.download_url or not os.path.exists(conversion.download_url):
+        flash('Download file not found. Please try generating the conversion again.', 'error')
+        return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+    
+    try:
+        return send_file(
+            conversion.download_url,
+            as_attachment=True,
+            download_name=f'conversion_{conversion_uuid}.zip',
+            mimetype='application/zip'
+        )
+    except Exception as e:
+        current_app.logger.error(f'Error downloading file {conversion.download_url}: {str(e)}')
+        flash('Error downloading file. Please try again.', 'error')
+        return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+
+
+@converter.route('/preview/<conversion_uuid>')
+@login_required
+def preview_conversion(conversion_uuid):
+    """Preview generated HTML."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        abort(404)
+    
+    if conversion.status != 'completed':
+        abort(404)
+    
+    if conversion.preview_url and os.path.exists(conversion.preview_url):
+        return send_file(conversion.preview_url)
+    
+    # Generate preview on the fly if file doesn't exist
+    try:
+        from app.converter.utils import generate_preview_html
+        preview_html = generate_preview_html(
+            conversion.generated_html or '',
+            conversion.generated_css or '',
+            conversion.generated_js or ''
+        )
+        
+        from flask import Response
+        return Response(preview_html, mimetype='text/html')
+        
+    except Exception as e:
+        current_app.logger.error(f'Error generating preview for {conversion_uuid}: {str(e)}')
+        abort(500)
+
+
+@converter.route('/feedback/<conversion_uuid>', methods=['POST'])
+@login_required
+def submit_feedback(conversion_uuid):
+    """Submit feedback for a conversion."""
+    # Verify conversion belongs to current user
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        return jsonify({'error': 'Conversion not found'}), 404
+    
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        try:
+            # Check if feedback already exists
+            existing_feedback = ConversionFeedback.query.filter_by(
+                conversion_id=conversion.id,
+                account_id=current_user.id
+            ).first()
+            
+            if existing_feedback:
+                # Update existing feedback
+                existing_feedback.rating = int(form.rating.data)
+                existing_feedback.feedback_text = form.feedback_text.data
+                existing_feedback.issues = form.issues.data
+                existing_feedback.updated_at = datetime.utcnow()
+            else:
+                # Create new feedback
+                feedback = ConversionFeedback(
+                    conversion_id=conversion.id,
+                    account_id=current_user.id,
+                    rating=int(form.rating.data),
+                    feedback_text=form.feedback_text.data,
+                    issues=form.issues.data
+                )
+                db.session.add(feedback)
+            
+            db.session.commit()
+            
+            if request.is_json:
+                return jsonify({'success': True, 'message': 'Feedback submitted successfully'})
+            else:
+                flash('Thank you for your feedback!', 'success')
+                return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+                
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f'Error submitting feedback: {str(e)}')
+            
+            if request.is_json:
+                return jsonify({'error': 'Failed to submit feedback'}), 500
+            else:
+                flash('Failed to submit feedback. Please try again.', 'error')
+                return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+    
+    if request.is_json:
+        return jsonify({'error': 'Invalid form data', 'errors': form.errors}), 400
+    else:
+        flash('Please correct the errors and try again.', 'error')
+        return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))

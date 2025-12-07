@@ -35,6 +35,13 @@ task_routes = {
     'app.tasks.analytics_tasks.*': {'queue': 'analytics'},
 }
 
+# Include tasks
+include = [
+    'app.tasks.conversion_tasks',
+    'app.tasks.email_tasks',
+    'app.tasks.analytics_tasks',
+]
+
 # Beat schedule (for periodic tasks)
 beat_schedule = {
     'cleanup-expired-conversions': {

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Processing - Screenshot to Code{% endblock %}
+
+{% block content %}
+<!-- Processing Section -->
+<section class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-black mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Converting Your Screenshot
+            </h1>
+            <p class="text-xl text-gray-600 mb-6">
+                Our AI is analyzing your design and generating code...
+            </p>
+        </div>
+
+        <!-- Processing Card -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-200 p-8 mb-8">
+            
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700" id="statusText">Starting conversion...</span>
+                    <span class="text-sm text-gray-500" id="progressPercent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out" 
+                         id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Processing Animation -->
+            <div class="text-center mb-8">
+                <div class="relative inline-block">
+                    <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+                        <i class="fas fa-magic text-white text-3xl animate-pulse" id="processingIcon"></i>
+                    </div>
+                    <div class="absolute -top-2 -right-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center animate-bounce">
+                            <i class="fas fa-check text-white text-sm" id="successIcon" style="display: none;"></i>
+                            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" id="spinnerIcon"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Current Step -->
+            <div class="text-center mb-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-2" id="currentStep">Preparing your screenshot</h3>
+                <p class="text-gray-600" id="stepDescription">This usually takes 30-60 seconds</p>
+            </div>
+            
+            <!-- Processing Steps -->
+            <div class="space-y-4 mb-8">
+                <div class="flex items-center p-4 rounded-xl bg-blue-50 border-l-4 border-blue-500" id="step1">
+                    <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Image Analysis</h4>
+                        <p class="text-gray-600 text-sm">AI is examining your screenshot for UI components</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center p-4 rounded-xl bg-gray-50 border-l-4 border-gray-300" id="step2">
+                    <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4">2</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-600">Code Generation</h4>
+                        <p class="text-gray-500 text-sm">Creating {{ conversion.framework|title }} components with {{ conversion.css_framework|title }} styling</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center p-4 rounded-xl bg-gray-50 border-l-4 border-gray-300" id="step3">
+                    <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4">3</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-600">Preview Generation</h4>
+                        <p class="text-gray-500 text-sm">Preparing preview and download package</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conversion Details -->
+            <div class="bg-gray-50 rounded-xl p-6">
+                <h4 class="font-semibold text-gray-900 mb-4">Conversion Details</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-500">Framework:</span>
+                        <span class="font-medium text-gray-900 ml-2">{{ conversion.framework|title }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">CSS Framework:</span>
+                        <span class="font-medium text-gray-900 ml-2">{{ conversion.css_framework|title }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Started:</span>
+                        <span class="font-medium text-gray-900 ml-2">{{ conversion.created_at.strftime('%H:%M:%S') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error State (Hidden by default) -->
+        <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center hidden" id="errorState">
+            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+            <h3 class="text-xl font-bold text-red-800 mb-2">Conversion Failed</h3>
+            <p class="text-red-600 mb-6" id="errorMessage">An error occurred during conversion.</p>
+            <div class="space-x-4">
+                <button onclick="retryConversion()" 
+                        class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                    <i class="fas fa-redo mr-2"></i>Retry Conversion
+                </button>
+                <a href="{{ url_for('account.dashboard') }}" 
+                   class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors inline-block">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <!-- Help Section -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 text-center">
+            <h3 class="font-semibold text-gray-900 mb-2">Taking longer than expected?</h3>
+            <p class="text-gray-600 text-sm mb-4">
+                Complex screenshots may take up to 2 minutes to process. You can safely close this page and check your dashboard later.
+            </p>
+            <a href="{{ url_for('account.dashboard') }}" 
+               class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                <i class="fas fa-external-link-alt mr-1"></i>View Dashboard
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const conversionUuid = '{{ conversion_uuid }}';
+    let pollInterval;
+    let currentProgress = 0;
+    
+    const statusText = document.getElementById('statusText');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressBar = document.getElementById('progressBar');
+    const currentStep = document.getElementById('currentStep');
+    const stepDescription = document.getElementById('stepDescription');
+    const processingIcon = document.getElementById('processingIcon');
+    const spinnerIcon = document.getElementById('spinnerIcon');
+    const successIcon = document.getElementById('successIcon');
+    const errorState = document.getElementById('errorState');
+    
+    // Step elements
+    const steps = {
+        1: document.getElementById('step1'),
+        2: document.getElementById('step2'),
+        3: document.getElementById('step3')
+    };
+    
+    // Update progress
+    function updateProgress(progress, status, step = 1) {
+        currentProgress = progress;
+        progressBar.style.width = progress + '%';
+        progressPercent.textContent = progress + '%';
+        statusText.textContent = status;
+        
+        // Update current step display
+        if (step === 1) {
+            currentStep.textContent = 'Analyzing Screenshot';
+            stepDescription.textContent = 'AI is examining your design for components and layout';
+        } else if (step === 2) {
+            currentStep.textContent = 'Generating Code';
+            stepDescription.textContent = 'Creating production-ready code for your framework';
+        } else if (step === 3) {
+            currentStep.textContent = 'Finalizing';
+            stepDescription.textContent = 'Preparing preview and download package';
+        }
+        
+        // Update step indicators
+        updateStepIndicators(step);
+    }
+    
+    // Update step indicators
+    function updateStepIndicators(currentStepNum) {
+        Object.keys(steps).forEach(stepNum => {
+            const stepEl = steps[stepNum];
+            const stepNumber = parseInt(stepNum);
+            const circle = stepEl.querySelector('.w-8.h-8');
+            const title = stepEl.querySelector('h4');
+            const description = stepEl.querySelector('p');
+            
+            if (stepNumber < currentStepNum) {
+                // Completed step
+                stepEl.className = 'flex items-center p-4 rounded-xl bg-green-50 border-l-4 border-green-500';
+                circle.className = 'w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4';
+                circle.innerHTML = '<i class="fas fa-check"></i>';
+                title.className = 'font-semibold text-green-800';
+                description.className = 'text-green-600 text-sm';
+            } else if (stepNumber === currentStepNum) {
+                // Current step
+                stepEl.className = 'flex items-center p-4 rounded-xl bg-blue-50 border-l-4 border-blue-500';
+                circle.className = 'w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4';
+                circle.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                title.className = 'font-semibold text-gray-900';
+                description.className = 'text-gray-600 text-sm';
+            } else {
+                // Future step
+                stepEl.className = 'flex items-center p-4 rounded-xl bg-gray-50 border-l-4 border-gray-300';
+                circle.className = 'w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4';
+                circle.textContent = stepNumber;
+                title.className = 'font-semibold text-gray-600';
+                description.className = 'text-gray-500 text-sm';
+            }
+        });
+    }
+    
+    // Poll conversion status
+    function pollStatus() {
+        fetch(`/converter/api/status/${conversionUuid}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Status update:', data);
+                
+                if (data.success) {
+                    const status = data.status;
+                    
+                    if (status === 'pending') {
+                        updateProgress(10, 'Starting conversion...', 1);
+                    } else if (status === 'processing') {
+                        // Gradually increase progress based on time
+                        if (currentProgress < 85) {
+                            const newProgress = Math.min(85, currentProgress + 5);
+                            updateProgress(newProgress, 'Processing screenshot...', 2);
+                        }
+                    } else if (status === 'completed') {
+                        updateProgress(100, 'Conversion completed!', 3);
+                        
+                        // Show success state
+                        processingIcon.className = 'fas fa-check text-white text-3xl';
+                        spinnerIcon.style.display = 'none';
+                        successIcon.style.display = 'block';
+                        
+                        // Stop polling
+                        clearInterval(pollInterval);
+                        
+                        // Redirect to result page after a short delay
+                        setTimeout(() => {
+                            window.location.href = `/converter/result/${conversionUuid}`;
+                        }, 2000);
+                        
+                    } else if (status === 'failed') {
+                        // Show error state
+                        clearInterval(pollInterval);
+                        showError(data.error_message || 'Conversion failed. Please try again.');
+                    }
+                } else {
+                    console.error('Error fetching status:', data.error);
+                    showError(data.error || 'Failed to get conversion status');
+                }
+            })
+            .catch(error => {
+                console.error('Network error:', error);
+                showError('Network error. Please check your connection.');
+            });
+    }
+    
+    // Show error state
+    function showError(message) {
+        clearInterval(pollInterval);
+        document.querySelector('.bg-white.rounded-3xl').style.display = 'none';
+        errorState.classList.remove('hidden');
+        document.getElementById('errorMessage').textContent = message;
+    }
+    
+    // Retry conversion
+    window.retryConversion = function() {
+        fetch(`/converter/api/retry/${conversionUuid}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload page to restart polling
+                window.location.reload();
+            } else {
+                alert('Failed to retry: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error retrying conversion:', error);
+            alert('Failed to retry conversion. Please try again.');
+        });
+    };
+    
+    // Start polling immediately
+    pollStatus();
+    
+    // Continue polling every 2 seconds
+    pollInterval = setInterval(pollStatus, 2000);
+    
+    // Stop polling when page is closed
+    window.addEventListener('beforeunload', function() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+        }
+    });
+});
+</script>
+{% endblock %}

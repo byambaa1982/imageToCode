@@ -45,10 +45,87 @@
                             Drag & drop your screenshot here or click to browse
                         </p>
                         
-                        <!-- Coming Soon Notice -->
-                        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-dashed border-purple-300 rounded-2xl p-8 mb-8">
-                            <i class="fas fa-rocket text-4xl text-purple-500 mb-4"></i>
-                            <h3 class="text-xl font-bold text-purple-700 mb-2">Coming in Phase 2</h3>
+                        <!-- Upload Form -->
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm" class="space-y-6">
+                            {{ form.hidden_tag() }}
+                            
+                            <!-- File Input Area -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-purple-400 transition-colors duration-300" 
+                                 id="dropZone">
+                                {{ form.screenshot(class="hidden", id="fileInput", accept=".png,.jpg,.jpeg,.gif,.webp") }}
+                                <div id="uploadArea" class="text-center">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-lg font-medium text-gray-700 mb-2">Drop your screenshot here</p>
+                                    <p class="text-sm text-gray-500 mb-4">or click to browse</p>
+                                    <button type="button" onclick="document.getElementById('fileInput').click()" 
+                                            class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                        Choose File
+                                    </button>
+                                </div>
+                                <div id="filePreview" class="hidden">
+                                    <img id="previewImage" class="max-w-full h-32 object-contain mx-auto rounded-lg mb-4">
+                                    <p id="fileName" class="text-sm text-gray-600 mb-2"></p>
+                                    <button type="button" onclick="removeFile()" 
+                                            class="text-red-500 hover:text-red-700 text-sm">
+                                        <i class="fas fa-times mr-1"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {% if form.screenshot.errors %}
+                                <div class="text-red-600 text-sm">
+                                    {% for error in form.screenshot.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Configuration Options -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <!-- Framework Selection -->
+                                <div>
+                                    {{ form.framework.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                                    {{ form.framework(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                                </div>
+                                
+                                <!-- CSS Framework Selection -->
+                                <div>
+                                    {{ form.css_framework.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                                    {{ form.css_framework(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Options -->
+                            <div class="space-y-3 mt-6">
+                                <div class="flex items-center">
+                                    {{ form.responsive_design(class="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50") }}
+                                    {{ form.responsive_design.label(class="ml-2 text-sm text-gray-700") }}
+                                </div>
+                                <div class="flex items-center">
+                                    {{ form.include_animations(class="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50") }}
+                                    {{ form.include_animations.label(class="ml-2 text-sm text-gray-700") }}
+                                </div>
+                                <div class="flex items-center">
+                                    {{ form.accessibility_focus(class="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50") }}
+                                    {{ form.accessibility_focus.label(class="ml-2 text-sm text-gray-700") }}
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Instructions -->
+                            <div class="mt-6">
+                                {{ form.additional_instructions.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                                {{ form.additional_instructions(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="mt-8 text-center">
+                                <button type="submit" id="submitBtn" disabled
+                                        class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                    <i class="fas fa-magic mr-2"></i>
+                                    Generate Code (1 Credit)
+                                </button>
+                            </div>
+                        </form>
                             <p class="text-purple-600">
                                 Upload functionality will be available soon! We're putting the finishing touches on our AI conversion engine.
                             </p>
@@ -204,22 +281,117 @@
     </div>
 </section>
 
+{% endblock %}
+
 {% block extra_js %}
 <script>
-    // Framework selection interaction
-    document.querySelectorAll('.cursor-pointer').forEach(card => {
-        card.addEventListener('click', function() {
-            // Remove previous selection
-            document.querySelectorAll('.cursor-pointer').forEach(c => {
-                c.classList.remove('border-blue-500', 'bg-blue-100');
-                c.classList.add('border-gray-200');
-            });
-            
-            // Add selection to clicked card
-            this.classList.remove('border-gray-200');
-            this.classList.add('border-blue-500', 'bg-blue-100');
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const uploadArea = document.getElementById('uploadArea');
+    const filePreview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Enable/disable submit button
+    function toggleSubmitButton() {
+        submitBtn.disabled = !fileInput.files.length;
+    }
+
+    // File input change handler
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFileSelect(file);
+        }
     });
+
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('border-purple-400', 'bg-purple-50');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-purple-400', 'bg-purple-50');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-purple-400', 'bg-purple-50');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Validate file type
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+            if (allowedTypes.includes(file.type)) {
+                fileInput.files = files;
+                handleFileSelect(file);
+            } else {
+                alert('Please upload a valid image file (PNG, JPG, GIF, WebP)');
+            }
+        }
+    });
+
+    // Handle file selection
+    function handleFileSelect(file) {
+        // Validate file size (16MB)
+        if (file.size > 16 * 1024 * 1024) {
+            alert('File size must be less than 16MB');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
+            
+            uploadArea.classList.add('hidden');
+            filePreview.classList.remove('hidden');
+            
+            toggleSubmitButton();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Remove file
+    window.removeFile = function() {
+        fileInput.value = '';
+        uploadArea.classList.remove('hidden');
+        filePreview.classList.add('hidden');
+        toggleSubmitButton();
+    };
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Form submission
+    uploadForm.addEventListener('submit', function(e) {
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please select a file to upload');
+            return;
+        }
+
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+        submitBtn.disabled = true;
+    });
+
+    // Initial state
+    toggleSubmitButton();
+});
 </script>
-{% endblock %}
 {% endblock %}

@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}Result - Screenshot to Code{% endblock %}
+
+{% block content %}
+<!-- Result Section -->
+<section class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full shadow-lg mb-4">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span class="font-bold">Conversion Completed!</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Your Code is Ready
+            </h1>
+            <p class="text-lg text-gray-600">
+                {{ conversion.framework|title }} code generated with {{ conversion.css_framework|title }} styling
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mb-8">
+            <div class="inline-flex flex-wrap gap-4 justify-center">
+                <a href="{{ url_for('converter.download_conversion', conversion_uuid=conversion.uuid) }}" 
+                   class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-download mr-2"></i>Download Code
+                </a>
+                <button onclick="copyAllCode()" 
+                        class="bg-gray-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-gray-700 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-copy mr-2"></i>Copy All Code
+                </button>
+                <a href="{{ url_for('converter.preview_conversion', conversion_uuid=conversion.uuid) }}" 
+                   target="_blank"
+                   class="bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-700 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-external-link-alt mr-2"></i>Live Preview
+                </a>
+                <a href="{{ url_for('converter.upload') }}" 
+                   class="bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-orange-700 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-plus mr-2"></i>Convert Another
+                </a>
+            </div>
+        </div>
+
+        <!-- Code Tabs -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
+            
+            <!-- Tab Navigation -->
+            <div class="border-b border-gray-200 bg-gray-50 p-4">
+                <nav class="flex space-x-8">
+                    {% if conversion.generated_html %}
+                    <button class="tab-button active px-4 py-2 text-sm font-medium rounded-lg transition-colors" 
+                            data-tab="html">
+                        <i class="fab fa-html5 mr-2 text-orange-500"></i>
+                        HTML{% if conversion.framework == 'react' %} (JSX){% endif %}
+                    </button>
+                    {% endif %}
+                    
+                    {% if conversion.generated_css %}
+                    <button class="tab-button px-4 py-2 text-sm font-medium rounded-lg transition-colors" 
+                            data-tab="css">
+                        <i class="fab fa-css3-alt mr-2 text-blue-500"></i>
+                        CSS{% if conversion.css_framework == 'tailwind' %} (Tailwind){% endif %}
+                    </button>
+                    {% endif %}
+                    
+                    {% if conversion.generated_js %}
+                    <button class="tab-button px-4 py-2 text-sm font-medium rounded-lg transition-colors" 
+                            data-tab="js">
+                        <i class="fab fa-js-square mr-2 text-yellow-500"></i>
+                        JavaScript
+                    </button>
+                    {% endif %}
+                    
+                    <button class="tab-button px-4 py-2 text-sm font-medium rounded-lg transition-colors" 
+                            data-tab="preview">
+                        <i class="fas fa-eye mr-2 text-purple-500"></i>
+                        Preview
+                    </button>
+                </nav>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="relative">
+                
+                <!-- HTML Tab -->
+                {% if conversion.generated_html %}
+                <div class="tab-content active" id="html-tab">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 border-b">
+                        <h3 class="font-semibold text-gray-900">
+                            {% if conversion.framework == 'react' %}React Component{% else %}HTML Structure{% endif %}
+                        </h3>
+                        <button onclick="copyCode('html')" 
+                                class="copy-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-copy mr-1"></i>Copy
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <pre class="language-html"><code id="html-code">{{ conversion.generated_html }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- CSS Tab -->
+                {% if conversion.generated_css %}
+                <div class="tab-content" id="css-tab">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 border-b">
+                        <h3 class="font-semibold text-gray-900">
+                            {% if conversion.css_framework == 'tailwind' %}Tailwind Classes{% else %}CSS Styles{% endif %}
+                        </h3>
+                        <button onclick="copyCode('css')" 
+                                class="copy-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-copy mr-1"></i>Copy
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <pre class="language-css"><code id="css-code">{{ conversion.generated_css }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- JavaScript Tab -->
+                {% if conversion.generated_js %}
+                <div class="tab-content" id="js-tab">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 border-b">
+                        <h3 class="font-semibold text-gray-900">JavaScript</h3>
+                        <button onclick="copyCode('js')" 
+                                class="copy-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-copy mr-1"></i>Copy
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <pre class="language-javascript"><code id="js-code">{{ conversion.generated_js }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Preview Tab -->
+                <div class="tab-content" id="preview-tab">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 border-b">
+                        <h3 class="font-semibold text-gray-900">Live Preview</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="togglePreviewSize('desktop')" 
+                                    class="preview-size-btn active px-3 py-1 rounded text-sm border transition-colors" 
+                                    data-size="desktop">
+                                <i class="fas fa-desktop mr-1"></i>Desktop
+                            </button>
+                            <button onclick="togglePreviewSize('tablet')" 
+                                    class="preview-size-btn px-3 py-1 rounded text-sm border transition-colors" 
+                                    data-size="tablet">
+                                <i class="fas fa-tablet-alt mr-1"></i>Tablet
+                            </button>
+                            <button onclick="togglePreviewSize('mobile')" 
+                                    class="preview-size-btn px-3 py-1 rounded text-sm border transition-colors" 
+                                    data-size="mobile">
+                                <i class="fas fa-mobile-alt mr-1"></i>Mobile
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-100 min-h-96">
+                        <div class="bg-white rounded-lg shadow-md mx-auto transition-all duration-300" id="preview-container">
+                            <iframe id="preview-frame" 
+                                    src="{{ url_for('converter.preview_conversion', conversion_uuid=conversion.uuid) }}"
+                                    class="w-full h-96 rounded-lg"
+                                    frameborder="0">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            
+            <!-- Statistics -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Conversion Statistics</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Processing Time:</span>
+                        <span class="font-medium">
+                            {% if conversion.processing_time %}
+                                {{ "%.1f"|format(conversion.processing_time) }}s
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tokens Used:</span>
+                        <span class="font-medium">{{ conversion.tokens_used or 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Framework:</span>
+                        <span class="font-medium">{{ conversion.framework|title }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">CSS Framework:</span>
+                        <span class="font-medium">{{ conversion.css_framework|title }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Generated:</span>
+                        <span class="font-medium">{{ conversion.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">How was this conversion?</h3>
+                
+                <form id="feedbackForm" method="POST" action="{{ url_for('converter.submit_feedback', conversion_uuid=conversion.uuid) }}">
+                    {{ feedback_form.hidden_tag() }}
+                    
+                    <!-- Rating -->
+                    <div class="mb-4">
+                        {{ feedback_form.rating.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                        {{ feedback_form.rating(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                    </div>
+                    
+                    <!-- Issues -->
+                    <div class="mb-4">
+                        {{ feedback_form.issues.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                        {{ feedback_form.issues(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                    </div>
+                    
+                    <!-- Feedback Text -->
+                    <div class="mb-4">
+                        {{ feedback_form.feedback_text.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                        {{ feedback_form.feedback_text(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                        Submit Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200 p-6 mt-8">
+            <h3 class="text-lg font-semibold text-purple-900 mb-4">🚀 Next Steps</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="flex items-start">
+                    <i class="fas fa-download text-purple-600 mr-3 mt-0.5"></i>
+                    <div>
+                        <strong class="text-purple-800">Download Files:</strong>
+                        <p class="text-purple-700">Get the ZIP package with all your code files</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-code text-purple-600 mr-3 mt-0.5"></i>
+                    <div>
+                        <strong class="text-purple-800">Integrate Code:</strong>
+                        <p class="text-purple-700">Copy-paste the code into your project</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-palette text-purple-600 mr-3 mt-0.5"></i>
+                    <div>
+                        <strong class="text-purple-800">Customize:</strong>
+                        <p class="text-purple-700">Modify colors, spacing, and styles as needed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+<style>
+    .tab-button {
+        @apply text-gray-600 bg-transparent border-transparent;
+    }
+    .tab-button.active {
+        @apply text-blue-600 bg-white border-blue-200 shadow-sm;
+    }
+    .tab-button:hover:not(.active) {
+        @apply text-gray-800 bg-gray-100;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    
+    pre {
+        max-height: 500px;
+        overflow-y: auto;
+        margin: 0;
+        padding: 1rem;
+        background: #1e1e1e !important;
+        border-radius: 0;
+    }
+    
+    code {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #d4d4d4 !important;
+    }
+    
+    .preview-size-btn {
+        @apply bg-white text-gray-600 border-gray-300;
+    }
+    .preview-size-btn.active {
+        @apply bg-blue-600 text-white border-blue-600;
+    }
+    .preview-size-btn:hover:not(.active) {
+        @apply bg-gray-50 text-gray-800;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.tab;
+            
+            // Remove active classes
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            button.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        });
+    });
+    
+    // Copy code functionality
+    window.copyCode = function(type) {
+        const codeElement = document.getElementById(type + '-code');
+        const text = codeElement.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            // Show success message
+            const button = event.target.closest('.copy-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+            button.classList.add('bg-green-600');
+            button.classList.remove('bg-blue-600');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-green-600');
+                button.classList.add('bg-blue-600');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy code. Please try selecting and copying manually.');
+        });
+    };
+    
+    // Copy all code
+    window.copyAllCode = function() {
+        let allCode = '';
+        
+        {% if conversion.generated_html %}
+        allCode += '// HTML\\n';
+        allCode += '{{ conversion.generated_html|safe|replace("\\", "\\\\")|replace("\"", "\\\"")|replace("\\n", "\\\\n")|replace("\\r", "") }}';
+        allCode += '\\n\\n';
+        {% endif %}
+        
+        {% if conversion.generated_css %}
+        allCode += '// CSS\\n';
+        allCode += '{{ conversion.generated_css|safe|replace("\\", "\\\\")|replace("\"", "\\\"")|replace("\\n", "\\\\n")|replace("\\r", "") }}';
+        allCode += '\\n\\n';
+        {% endif %}
+        
+        {% if conversion.generated_js %}
+        allCode += '// JavaScript\\n';
+        allCode += '{{ conversion.generated_js|safe|replace("\\", "\\\\")|replace("\"", "\\\"")|replace("\\n", "\\\\n")|replace("\\r", "") }}';
+        {% endif %}
+        
+        navigator.clipboard.writeText(allCode).then(() => {
+            alert('All code copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy code. Please try copying each section individually.');
+        });
+    };
+    
+    // Preview size toggle
+    window.togglePreviewSize = function(size) {
+        const container = document.getElementById('preview-container');
+        const frame = document.getElementById('preview-frame');
+        const buttons = document.querySelectorAll('.preview-size-btn');
+        
+        // Remove active class from all buttons
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        // Add active class to clicked button
+        event.target.classList.add('active');
+        
+        // Apply size styles
+        if (size === 'desktop') {
+            container.className = 'bg-white rounded-lg shadow-md mx-auto transition-all duration-300';
+            frame.style.width = '100%';
+        } else if (size === 'tablet') {
+            container.className = 'bg-white rounded-lg shadow-md mx-auto transition-all duration-300 max-w-3xl';
+            frame.style.width = '100%';
+        } else if (size === 'mobile') {
+            container.className = 'bg-white rounded-lg shadow-md mx-auto transition-all duration-300 max-w-sm';
+            frame.style.width = '100%';
+        }
+    };
+    
+    // Feedback form submission
+    const feedbackForm = document.getElementById('feedbackForm');
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(feedbackForm);
+            
+            fetch(feedbackForm.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Thank you for your feedback!');
+                    feedbackForm.reset();
+                } else {
+                    alert('Failed to submit feedback. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit feedback. Please try again.');
+            });
+        });
+    }
+    
+    // Initialize syntax highlighting
+    if (window.Prism) {
+        Prism.highlightAll();
+    }
+});
+</script>
+{% endblock %}
