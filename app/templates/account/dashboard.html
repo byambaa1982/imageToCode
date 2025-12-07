@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Screenshot to Code{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Welcome, {{ current_user.username }}!</h1>
+        <p class="text-gray-600 mt-2">Manage your conversions and account settings</p>
+    </div>
+    
+    {% if not current_user.email_verified %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p class="text-sm text-yellow-700 mb-2">
+                    Your email address is not verified. Please check your inbox for the verification link.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="{{ url_for('auth.resend_verification') }}" class="font-medium underline text-yellow-700 hover:text-yellow-800">
+                        Resend verification email
+                    </a>
+                    {% if config.ENV != 'production' %}
+                    <a href="{{ url_for('account.dev_verify_email') }}" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-700">
+                        🔧 Dev: Verify Now
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-bolt text-4xl text-emerald-600"></i>
+                </div>
+                <div class="ml-5">
+                    <p class="text-gray-500 text-sm">Free Conversions Available</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ current_user.credits_remaining|round(0) }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-image text-4xl text-blue-500"></i>
+                </div>
+                <div class="ml-5">
+                    <p class="text-gray-500 text-sm">Total Conversions</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ current_user.conversions.count() }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-calendar text-4xl text-green-500"></i>
+                </div>
+                <div class="ml-5">
+                    <p class="text-gray-500 text-sm">Member Since</p>
+                    <p class="text-xl font-bold text-gray-900">{{ current_user.created_at.strftime('%b %Y') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{{ url_for('converter.upload') }}" class="bg-purple-600 text-white p-4 rounded-lg text-center hover:bg-purple-700 transition">
+                <i class="fas fa-upload text-3xl mb-2"></i>
+                <p class="font-semibold">New Conversion</p>
+            </a>
+            
+            <a href="{{ url_for('account.history') }}" class="bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition">
+                <i class="fas fa-history text-3xl mb-2"></i>
+                <p class="font-semibold">View History</p>
+            </a>
+            
+            <a href="{{ url_for('payment.pricing') }}" class="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700 transition">
+                <i class="fas fa-shopping-cart text-3xl mb-2"></i>
+                <p class="font-semibold">Buy Credits</p>
+            </a>
+            
+            <a href="{{ url_for('account.settings') }}" class="bg-gray-600 text-white p-4 rounded-lg text-center hover:bg-gray-700 transition">
+                <i class="fas fa-cog text-3xl mb-2"></i>
+                <p class="font-semibold">Settings</p>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Recent Conversions</h2>
+        
+        {% if recent_conversions %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filename</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Framework</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for conversion in recent_conversions %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ conversion.original_filename[:30] }}...
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ conversion.framework|capitalize }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if conversion.status == 'completed' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Completed
+                                    </span>
+                                {% elif conversion.status == 'processing' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Processing
+                                    </span>
+                                {% elif conversion.status == 'failed' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Failed
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ conversion.created_at.strftime('%b %d, %Y') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {% if conversion.status == 'completed' %}
+                                    <a href="{{ url_for('converter.result', conversion_uuid=conversion.uuid) }}" class="text-purple-600 hover:text-purple-900">
+                                        View
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('account.history') }}" class="text-purple-600 hover:text-purple-800 font-medium">
+                    View All Conversions →
+                </a>
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-center py-8">
+                No conversions yet. 
+                <a href="{{ url_for('converter.upload') }}" class="text-purple-600 hover:text-purple-800 font-medium">
+                    Start your first conversion
+                </a>
+            </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

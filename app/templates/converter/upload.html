@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Upload - Screenshot to Code{% endblock %}
+
+{% block content %}
+<!-- Upload Section -->
+<section class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-black mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Convert Screenshot to Code
+            </h1>
+            <p class="text-xl text-gray-600 mb-6">
+                Transform your UI designs into production-ready code in seconds
+            </p>
+            
+            <!-- Credits Display -->
+            <div class="inline-flex items-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-full shadow-lg">
+                <i class="fas fa-bolt mr-2"></i>
+                <span class="font-bold">{{ current_user.credits_remaining|round(0) }} free conversions remaining</span>
+            </div>
+        </div>
+
+        <!-- Main Upload Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            
+            <!-- Left Column - Upload -->
+            <div class="space-y-8">
+                <!-- Upload Drop Zone -->
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-200 p-8 hover-lift">
+                    <div class="text-center">
+                        <div class="relative mb-8">
+                            <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+                                <i class="fas fa-cloud-upload-alt text-white text-3xl"></i>
+                            </div>
+                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-sm"></i>
+                            </div>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Upload Your Screenshot</h2>
+                        <p class="text-gray-600 mb-8">
+                            Drag & drop your screenshot here or click to browse
+                        </p>
+                        
+                        <!-- Upload Form -->
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm" class="space-y-6">
+                            {{ form.hidden_tag() }}
+                            
+                            <!-- File Input Area -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-purple-400 transition-colors duration-300" 
+                                 id="dropZone">
+                                {{ form.screenshot(class="hidden", id="fileInput", accept=".png,.jpg,.jpeg,.gif,.webp") }}
+                                <div id="uploadArea" class="text-center">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-lg font-medium text-gray-700 mb-2">Drop your screenshot here</p>
+                                    <p class="text-sm text-gray-500 mb-4">or click to browse</p>
+                                    <button type="button" onclick="document.getElementById('fileInput').click()" 
+                                            class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                        Choose File
+                                    </button>
+                                </div>
+                                <div id="filePreview" class="hidden">
+                                    <img id="previewImage" class="max-w-full h-32 object-contain mx-auto rounded-lg mb-4">
+                                    <p id="fileName" class="text-sm text-gray-600 mb-2"></p>
+                                    <button type="button" onclick="removeFile()" 
+                                            class="text-red-500 hover:text-red-700 text-sm">
+                                        <i class="fas fa-times mr-1"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {% if form.screenshot.errors %}
+                                <div class="text-red-600 text-sm">
+                                    {% for error in form.screenshot.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Configuration Options -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <!-- Framework Selection -->
+                                <div>
+                                    {{ form.framework.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                                    {{ form.framework(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                                </div>
+                                
+                                <!-- CSS Framework Selection -->
+                                <div>
+                                    {{ form.css_framework.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                                    {{ form.css_framework(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Options -->
+                            <div class="space-y-3 mt-6">
+                                <div class="flex items-center">
+                                    {{ form.responsive_design(class="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50") }}
+                                    {{ form.responsive_design.label(class="ml-2 text-sm text-gray-700") }}
+                                </div>
+                                <div class="flex items-center">
+                                    {{ form.include_animations(class="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50") }}
+                                    {{ form.include_animations.label(class="ml-2 text-sm text-gray-700") }}
+                                </div>
+                                <div class="flex items-center">
+                                    {{ form.accessibility_focus(class="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50") }}
+                                    {{ form.accessibility_focus.label(class="ml-2 text-sm text-gray-700") }}
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Instructions -->
+                            <div class="mt-6">
+                                {{ form.additional_instructions.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                                {{ form.additional_instructions(class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500") }}
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="mt-8 text-center">
+                                <button type="submit" id="submitBtn" disabled
+                                        class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                    <i class="fas fa-magic mr-2"></i>
+                                    Generate Code (1 Credit)
+                                </button>
+                            </div>
+                        </form>
+                            <p class="text-purple-600">
+                                Upload functionality will be available soon! We're putting the finishing touches on our AI conversion engine.
+                            </p>
+                        </div>
+                        
+                        <!-- File Requirements -->
+                        <div class="bg-gray-50 rounded-2xl p-6">
+                            <h3 class="font-semibold text-gray-900 mb-4">Supported Formats</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-file-image text-blue-500 mr-2"></i>
+                                    PNG, JPG, JPEG
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-file-image text-green-500 mr-2"></i>
+                                    GIF, WebP
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-weight-hanging text-purple-500 mr-2"></i>
+                                    Max 16MB
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-expand-arrows-alt text-orange-500 mr-2"></i>
+                                    Any resolution
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Framework Selection Preview -->
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-200 p-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Choose Your Framework</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-blue-50 rounded-xl border-2 border-blue-200 text-center cursor-pointer hover:bg-blue-100 transition-colors">
+                            <i class="fab fa-react text-2xl text-blue-500 mb-2"></i>
+                            <div class="font-semibold text-gray-800">React</div>
+                            <div class="text-sm text-gray-500">JSX + Hooks</div>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-xl border-2 border-gray-200 text-center cursor-pointer hover:bg-green-100 transition-colors">
+                            <i class="fab fa-vuejs text-2xl text-green-500 mb-2"></i>
+                            <div class="font-semibold text-gray-800">Vue.js</div>
+                            <div class="text-sm text-gray-500">Vue 3</div>
+                        </div>
+                        <div class="p-4 bg-orange-50 rounded-xl border-2 border-gray-200 text-center cursor-pointer hover:bg-orange-100 transition-colors">
+                            <i class="fab fa-html5 text-2xl text-orange-500 mb-2"></i>
+                            <div class="font-semibold text-gray-800">HTML/CSS</div>
+                            <div class="text-sm text-gray-500">Pure + Tailwind</div>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-xl border-2 border-gray-200 text-center cursor-pointer hover:bg-red-100 transition-colors">
+                            <i class="fab fa-angular text-2xl text-red-500 mb-2"></i>
+                            <div class="font-semibold text-gray-800">Angular</div>
+                            <div class="text-sm text-gray-500">Components</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Preview & Features -->
+            <div class="space-y-8">
+                
+                <!-- Process Preview -->
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-200 p-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">What Happens Next?</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4 mt-1">1</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-1">AI Analysis</h4>
+                                <p class="text-gray-600 text-sm">Our AI examines your screenshot to understand the UI structure, components, and layout.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4 mt-1">2</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Code Generation</h4>
+                                <p class="text-gray-600 text-sm">Clean, production-ready code is generated based on your framework selection.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm mr-4 mt-1">3</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Download & Use</h4>
+                                <p class="text-gray-600 text-sm">Get your code files and copy-paste them directly into your project.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Output Preview -->
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-200 p-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Sample Output</h3>
+                    
+                    <div class="bg-gray-900 rounded-xl p-4 font-mono text-sm overflow-x-auto">
+                        <div class="text-green-400 mb-2">// Generated React Component</div>
+                        <div class="text-blue-400">import React from 'react';</div>
+                        <div class="text-yellow-400">const</div> <div class="text-purple-400">LoginForm</div> <div class="text-white">= () => {</div>
+                        <div class="text-white ml-4">return (</div>
+                        <div class="text-cyan-400 ml-8">&lt;div className="login-form"&gt;</div>
+                        <div class="text-cyan-400 ml-12">&lt;h2&gt;Sign In&lt;/h2&gt;</div>
+                        <div class="text-cyan-400 ml-12">&lt;input type="email" /&gt;</div>
+                        <div class="text-cyan-400 ml-12">&lt;button&gt;Login&lt;/button&gt;</div>
+                        <div class="text-cyan-400 ml-8">&lt;/div&gt;</div>
+                        <div class="text-white ml-4">);</div>
+                        <div class="text-white">};</div>
+                    </div>
+                </div>
+
+                <!-- Tips & Best Practices -->
+                <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl border border-purple-200 p-8">
+                    <h3 class="text-xl font-bold text-purple-900 mb-6 text-center">💡 Tips for Best Results</h3>
+                    
+                    <div class="space-y-4 text-sm">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+                            <div>
+                                <strong class="text-purple-800">High Resolution:</strong>
+                                <span class="text-purple-700"> Use clear, high-quality screenshots for better accuracy</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+                            <div>
+                                <strong class="text-purple-800">Clean UI:</strong>
+                                <span class="text-purple-700"> Remove overlays, popups, or temporary elements</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+                            <div>
+                                <strong class="text-purple-800">Full Components:</strong>
+                                <span class="text-purple-700"> Capture complete UI sections for better context</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom CTA -->
+        <div class="text-center mt-12">
+            <p class="text-gray-600 mb-4">Want to be notified when upload is ready?</p>
+            <button class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-bell mr-2"></i>
+                Get Notified
+            </button>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const uploadArea = document.getElementById('uploadArea');
+    const filePreview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Enable/disable submit button
+    function toggleSubmitButton() {
+        submitBtn.disabled = !fileInput.files.length;
+    }
+
+    // File input change handler
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFileSelect(file);
+        }
+    });
+
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('border-purple-400', 'bg-purple-50');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-purple-400', 'bg-purple-50');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-purple-400', 'bg-purple-50');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Validate file type
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+            if (allowedTypes.includes(file.type)) {
+                fileInput.files = files;
+                handleFileSelect(file);
+            } else {
+                alert('Please upload a valid image file (PNG, JPG, GIF, WebP)');
+            }
+        }
+    });
+
+    // Handle file selection
+    function handleFileSelect(file) {
+        // Validate file size (16MB)
+        if (file.size > 16 * 1024 * 1024) {
+            alert('File size must be less than 16MB');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
+            
+            uploadArea.classList.add('hidden');
+            filePreview.classList.remove('hidden');
+            
+            toggleSubmitButton();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Remove file
+    window.removeFile = function() {
+        fileInput.value = '';
+        uploadArea.classList.remove('hidden');
+        filePreview.classList.add('hidden');
+        toggleSubmitButton();
+    };
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Form submission
+    uploadForm.addEventListener('submit', function(e) {
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please select a file to upload');
+            return;
+        }
+
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+        submitBtn.disabled = true;
+    });
+
+    // Initial state
+    toggleSubmitButton();
+});
+</script>
+{% endblock %}

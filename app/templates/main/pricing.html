@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - Screenshot to Code{% endblock %}
+
+{% block content %}
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Simple, Pay-As-You-Go Pricing
+            </h1>
+            <p class="text-xl text-gray-600">
+                No subscriptions. Only pay for what you use. Credits never expire.
+            </p>
+        </div>
+        
+        <!-- Free Tier -->
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg p-8 mb-12 text-center">
+            <h3 class="text-2xl font-bold mb-2">New User Bonus</h3>
+            <p class="text-3xl font-bold mb-2">3 Free Conversions</p>
+            <p class="text-purple-100">Get started with no credit card required</p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="inline-block bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold mt-4 hover:bg-gray-100">
+                    Sign Up Now
+                </a>
+            {% endif %}
+        </div>
+        
+        <!-- Pricing Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {% for package in packages %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden {% if package.is_featured %}ring-4 ring-purple-600{% endif %} hover-scale">
+                {% if package.badge %}
+                <div class="bg-purple-600 text-white text-center py-2 font-semibold">
+                    {{ package.badge }}
+                </div>
+                {% endif %}
+                
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ package.name }}</h3>
+                    <p class="text-gray-600 mb-6">{{ package.description }}</p>
+                    
+                    <div class="mb-6">
+                        <span class="text-5xl font-bold text-gray-900">${{ package.price }}</span>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            {{ package.credits|int }} conversions
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            ${{ "%.2f"|format(package.price / package.credits) }} per conversion
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            All frameworks supported
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Credits never expire
+                        </li>
+                    </ul>
+                    
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('payment.checkout', package_code=package.code) }}" class="block w-full bg-purple-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            Purchase Now
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="block w-full bg-purple-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            Get Started
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="mt-20 max-w-3xl mx-auto">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Frequently Asked Questions</h2>
+            
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Do credits expire?</h3>
+                    <p class="text-gray-600">No! Your credits never expire. Buy them once and use them whenever you need.</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Can I get a refund?</h3>
+                    <p class="text-gray-600">Yes, we offer refunds within 7 days if you're not satisfied. Credits will be added back to your account.</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">What frameworks do you support?</h3>
+                    <p class="text-gray-600">We support React, Vue, HTML/CSS, Angular, and Svelte. You can also choose your CSS framework (Tailwind, Bootstrap, or vanilla CSS).</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Is there a bulk discount?</h3>
+                    <p class="text-gray-600">Yes! The Bulk Pack offers the best value at $0.80 per conversion. For enterprise needs, contact us for custom pricing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Frontend Testing - Screenshot to Code{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Frontend Improvements Test</h1>
+        <p class="text-xl text-gray-600">Testing the modernized UI components and accessibility features</p>
+    </div>
+    
+    <!-- Button Tests -->
+    <section class="mb-12" aria-labelledby="buttons-heading">
+        <h2 id="buttons-heading" class="text-2xl font-bold mb-6">Button Components</h2>
+        <div class="flex flex-wrap gap-4">
+            <button class="btn-primary">Primary Button</button>
+            <button class="btn-secondary">Secondary Button</button>
+            <button class="btn-outline">Outline Button</button>
+            <button class="btn-primary btn-lg">Large Primary</button>
+            <button class="btn-secondary btn-sm">Small Secondary</button>
+        </div>
+    </section>
+    
+    <!-- Card Tests -->
+    <section class="mb-12" aria-labelledby="cards-heading">
+        <h2 id="cards-heading" class="text-2xl font-bold mb-6">Card Components</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="card hover-scale">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold">Card Title</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-gray-600">This is a test card component with modern styling and hover effects.</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-primary btn-sm">Learn More</button>
+                </div>
+            </div>
+            
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <h3 class="text-lg font-semibold mb-3">Glass Effect Card</h3>
+                    <p class="text-gray-600">This card demonstrates the glassmorphism effect.</p>
+                </div>
+            </div>
+            
+            <div class="card gradient-card">
+                <div class="card-body text-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-star text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-3">Feature Card</h3>
+                    <p class="text-gray-600">Feature cards with icons and gradient backgrounds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Form Tests -->
+    <section class="mb-12" aria-labelledby="forms-heading">
+        <h2 id="forms-heading" class="text-2xl font-bold mb-6">Form Components</h2>
+        <div class="max-w-md mx-auto">
+            <form class="space-y-6">
+                <div class="form-group">
+                    <label for="test-email" class="form-label">Email Address</label>
+                    <input type="email" id="test-email" class="form-input" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-message" class="form-label">Message</label>
+                    <textarea id="test-message" class="form-input" rows="4" placeholder="Enter your message" data-auto-resize required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary w-full">Submit Form</button>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Alert Tests -->
+    <section class="mb-12" aria-labelledby="alerts-heading">
+        <h2 id="alerts-heading" class="text-2xl font-bold mb-6">Alert System</h2>
+        <div class="max-w-md mx-auto space-y-4">
+            <button onclick="ScreenshotToCode.showNotification('Success message!', 'success')" class="btn-secondary">
+                Show Success Alert
+            </button>
+            <button onclick="ScreenshotToCode.showNotification('Warning message!', 'warning')" class="btn-secondary">
+                Show Warning Alert
+            </button>
+            <button onclick="ScreenshotToCode.showNotification('Error message!', 'error')" class="btn-secondary">
+                Show Error Alert
+            </button>
+            <button onclick="ScreenshotToCode.showNotification('Info message!', 'info')" class="btn-secondary">
+                Show Info Alert
+            </button>
+        </div>
+    </section>
+    
+    <!-- Animation Tests -->
+    <section class="mb-12" aria-labelledby="animations-heading">
+        <h2 id="animations-heading" class="text-2xl font-bold mb-6">Animation Classes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card fade-in">
+                <div class="card-body text-center">
+                    <h3 class="font-semibold">Fade In</h3>
+                    <p class="text-sm text-gray-600">fade-in class</p>
+                </div>
+            </div>
+            
+            <div class="card slide-up">
+                <div class="card-body text-center">
+                    <h3 class="font-semibold">Slide Up</h3>
+                    <p class="text-sm text-gray-600">slide-up class</p>
+                </div>
+            </div>
+            
+            <div class="card scale-in">
+                <div class="card-body text-center">
+                    <h3 class="font-semibold">Scale In</h3>
+                    <p class="text-sm text-gray-600">scale-in class</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Accessibility Tests -->
+    <section class="mb-12" aria-labelledby="accessibility-heading">
+        <h2 id="accessibility-heading" class="text-2xl font-bold mb-6">Accessibility Features</h2>
+        <div class="space-y-4">
+            <p class="text-gray-600">
+                ✅ Skip to main content link (Tab to reveal)<br>
+                ✅ Proper heading hierarchy (h1-h6)<br>
+                ✅ ARIA labels and roles<br>
+                ✅ Keyboard navigation support<br>
+                ✅ Focus indicators<br>
+                ✅ Screen reader announcements<br>
+                ✅ High contrast mode support<br>
+                ✅ Reduced motion preferences
+            </p>
+            
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 class="text-green-800 font-semibold mb-2">Testing Instructions</h3>
+                <ul class="text-green-700 text-sm space-y-1">
+                    <li>• Use Tab key to navigate through elements</li>
+                    <li>• Press Escape to close mobile menu</li>
+                    <li>• Test with screen reader software</li>
+                    <li>• Verify color contrast ratios</li>
+                    <li>• Test on mobile devices</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Test JavaScript functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Frontend improvements loaded successfully!');
+        
+        // Test form validation
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                ScreenshotToCode.showNotification('Form submitted successfully!', 'success');
+            });
+        });
+    });
+</script>
+{% endblock %}
