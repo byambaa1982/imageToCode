@@ -96,8 +96,6 @@
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Recent Conversions</h2>
         
-        {% set recent_conversions = current_user.conversions.order_by(db_desc('created_at')).limit(5).all() %}
-        
         {% if recent_conversions %}
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
