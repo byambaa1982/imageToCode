@@ -5,8 +5,6 @@ from flask import render_template, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from app.account import account
 from app.models import Conversion
-<<<<<<< HEAD
-=======
 from app.extensions import db
 
 
@@ -26,20 +24,12 @@ def dev_verify_email():
         flash('✅ Email verified successfully for development!', 'success')
     
     return redirect(url_for('account.dashboard'))
->>>>>>> 2bf1b7da8016d815cd152db5a4ae2d975ae344b4
 
 
 @account.route('/dashboard')
 @login_required
 def dashboard():
     """User dashboard."""
-<<<<<<< HEAD
-    # Get recent conversions
-    recent_conversions = Conversion.query.filter_by(account_id=current_user.id)\
-        .order_by(Conversion.created_at.desc())\
-        .limit(5)\
-        .all()
-=======
     try:
         # Get recent conversions for the dashboard
         recent_conversions = current_user.conversions.order_by(Conversion.created_at.desc()).limit(5).all()
@@ -47,7 +37,6 @@ def dashboard():
         # If there's any error getting conversions, use empty list
         recent_conversions = []
         current_app.logger.error(f"Error fetching recent conversions for user {current_user.id}: {e}")
->>>>>>> 2bf1b7da8016d815cd152db5a4ae2d975ae344b4
     
     return render_template('account/dashboard.html', recent_conversions=recent_conversions)
 
