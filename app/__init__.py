@@ -97,6 +97,20 @@ def register_commands(app):
         print('Database initialized.')
     
     @app.cli.command()
+    def send_weekly_summaries():
+        """Send weekly summaries to all active users."""
+        from app.tasks.email_tasks import send_weekly_summary
+        send_weekly_summary.delay()
+        print('Weekly summary emails queued.')
+    
+    @app.cli.command()
+    def cleanup_tokens():
+        """Clean up expired tokens."""
+        from app.tasks.email_tasks import cleanup_expired_tokens
+        cleanup_expired_tokens.delay()
+        print('Token cleanup queued.')
+    
+    @app.cli.command()
     def seed_packages():
         """Seed the packages table with default data."""
         from app.models import Package
@@ -195,3 +209,51 @@ def register_commands(app):
         print(f'  Email: {email}')
         print(f'  Username: {username or "N/A"}')
         print(f'  Credits: 100.00')
+    
+    @app.cli.command()
+    def send_weekly_summaries():
+        """Send weekly summary emails to active users."""
+        from app.tasks.email_tasks import send_weekly_summary
+        
+        print('Sending weekly summary emails...')
+        try:
+            send_weekly_summary.delay()
+            print('✓ Weekly summary email task queued successfully.')
+        except Exception as e:
+            print(f'✗ Error queueing weekly summary task: {e}')
+    
+    @app.cli.command()
+    def cleanup_tokens():
+        """Clean up expired tokens."""
+        from app.tasks.email_tasks import cleanup_expired_tokens
+        
+        print('Cleaning up expired tokens...')
+        try:
+            cleanup_expired_tokens.delay()
+            print('✓ Token cleanup task queued successfully.')
+        except Exception as e:
+            print(f'✗ Error queueing cleanup task: {e}')
+    
+    @app.cli.command()
+    def test_email():
+        """Test email functionality."""
+        from app.tasks.email_tasks import send_email_task
+        
+        email = input('Enter test email address: ').strip()
+        if not email:
+            print('Error: Email is required.')
+            return
+        
+        print(f'Sending test email to {email}...')
+        try:
+            send_email_task.delay(
+                to_email=email,
+                subject="Test Email from Screenshot to Code",
+                template_name='welcome',
+                account={'username': 'Test User'},
+                dashboard_url='http://localhost:5000/account/dashboard',
+                upload_url='http://localhost:5000/converter/upload'
+            )
+            print('✓ Test email queued successfully.')
+        except Exception as e:
+            print(f'✗ Error sending test email: {e}')

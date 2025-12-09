@@ -73,8 +73,9 @@
     </div>
     {% endif %}
     
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Enhanced Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Credits Card -->
         <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-lg p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
@@ -99,6 +100,7 @@
             </div>
         </div>
         
+        <!-- Total Conversions Card -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -106,20 +108,103 @@
                 </div>
                 <div class="ml-5">
                     <p class="text-gray-500 text-sm">Total Conversions</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ current_user.conversions.count() }}</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ analytics.total_conversions }}</p>
+                    <p class="text-gray-400 text-xs mt-1">
+                        {{ analytics.conversions_this_month }} this month
+                    </p>
                 </div>
             </div>
         </div>
         
+        <!-- Success Rate Card -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <i class="fas fa-calendar text-4xl text-green-500"></i>
+                    <i class="fas fa-check-circle text-4xl text-green-500"></i>
+                </div>
+                <div class="ml-5">
+                    <p class="text-gray-500 text-sm">Success Rate</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ analytics.success_rate }}%</p>
+                    <p class="text-gray-400 text-xs mt-1">
+                        {{ analytics.successful_conversions }}/{{ analytics.total_conversions }} successful
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Member Since Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-calendar text-4xl text-indigo-500"></i>
                 </div>
                 <div class="ml-5">
                     <p class="text-gray-500 text-sm">Member Since</p>
                     <p class="text-xl font-bold text-gray-900">{{ current_user.created_at.strftime('%b %Y') }}</p>
+                    <p class="text-gray-400 text-xs mt-1">
+                        ${{ "%.2f"|format(analytics.total_credits_purchased) }} spent
+                    </p>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analytics Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Framework Usage Chart -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Framework Usage</h3>
+            <div id="frameworkChart" class="h-64">
+                {% if analytics.framework_stats %}
+                    <canvas id="frameworkCanvas"></canvas>
+                {% else %}
+                    <div class="flex items-center justify-center h-full text-gray-400">
+                        <div class="text-center">
+                            <i class="fas fa-chart-pie text-4xl mb-2"></i>
+                            <p>No data available</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Transactions</h3>
+            <div class="space-y-3">
+                {% if recent_transactions %}
+                    {% for transaction in recent_transactions %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            {% if transaction.amount > 0 %}
+                                <i class="fas fa-plus-circle text-green-500 mr-3"></i>
+                            {% else %}
+                                <i class="fas fa-minus-circle text-red-500 mr-3"></i>
+                            {% endif %}
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ transaction.description }}</p>
+                                <p class="text-xs text-gray-500">{{ transaction.created_at.strftime('%b %d, %Y at %I:%M %p') }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-semibold {% if transaction.amount > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                {% if transaction.amount > 0 %}+{% endif %}{{ transaction.amount }}
+                            </p>
+                            <p class="text-xs text-gray-500">Balance: {{ transaction.balance_after }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-receipt text-4xl mb-2"></i>
+                        <p>No transactions yet</p>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('account.billing') }}" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                    View All Transactions →
+                </a>
             </div>
         </div>
     </div>
@@ -225,4 +310,52 @@
         {% endif %}
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Framework Usage Chart
+{% if analytics.framework_stats %}
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('frameworkCanvas').getContext('2d');
+    const frameworkData = {{ analytics.framework_stats | tojson }};
+    
+    if (frameworkData && frameworkData.length > 0) {
+        const labels = frameworkData.map(item => item[0].charAt(0).toUpperCase() + item[0].slice(1));
+        const data = frameworkData.map(item => item[1]);
+    const colors = [
+        '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', 
+        '#EF4444', '#6366F1', '#EC4899', '#84CC16'
+    ];
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, data.length),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    });
+    }
+});
+{% endif %}
+</script>
 {% endblock %}

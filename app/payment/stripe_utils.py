@@ -187,6 +187,13 @@ def handle_checkout_completed(session):
                 f"Added {order.credits_purchased} credits to account {account.email} "
                 f"(Order: {order.id}, New balance: {account.credits_remaining})"
             )
+            
+            # Send purchase receipt email
+            try:
+                from app.tasks.email_tasks import send_purchase_receipt
+                send_purchase_receipt.delay(account.id, order.id)
+            except Exception as e:
+                current_app.logger.error(f"Failed to send purchase receipt email: {e}")
         
         db.session.commit()
         

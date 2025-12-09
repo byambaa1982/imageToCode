@@ -103,6 +103,14 @@ class Account(UserMixin, db.Model):
         )
         db.session.add(transaction)
         db.session.commit()
+        
+        # Send low credit warning if needed
+        if float(self.credits_remaining) == 1.0:  # Exactly 1 credit remaining
+            try:
+                from app.tasks.email_tasks import send_low_credit_warning
+                send_low_credit_warning.delay(self.id)
+            except Exception:
+                pass  # Don't let email failures affect the main flow
     
     def add_credits(self, amount, description='Credit purchase', order_id=None):
         """Add credits to account."""

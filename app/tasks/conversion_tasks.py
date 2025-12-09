@@ -120,12 +120,16 @@ def process_screenshot_conversion(conversion_uuid: str) -> Dict[str, Any]:
             
             db.session.commit()
             
+            # Send completion email notification
+            try:
+                from app.tasks.email_tasks import send_conversion_complete_email
+                send_conversion_complete_email.delay(conversion.account_id, conversion.id)
+            except Exception as e:
+                logger.error(f"Failed to send completion email for {conversion_uuid}: {e}")
+            
             # Cleanup temporary files
             cleanup_files = [processed_path] if processed_path != conversion.original_image_url else []
             cleanup_temp_files(cleanup_files)
-            
-            # Update task status (placeholder for future Celery integration)
-            logger.info(f'Conversion completed successfully for {conversion_uuid}')
             
             logger.info(f"Conversion {conversion_uuid} completed successfully")
             

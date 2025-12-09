@@ -97,6 +97,13 @@ def register():
         else:
             flash('Account created successfully! However, we could not send a verification email. Please contact support.', 'warning')
         
+        # Send welcome email
+        try:
+            from app.tasks.email_tasks import send_welcome_email
+            send_welcome_email.delay(user.id)
+        except Exception:
+            pass  # Don't let email failures affect registration
+        
         return redirect(url_for('auth.login'))
     
     return render_template('auth/register.html', form=form)
@@ -309,7 +316,11 @@ def google_callback():
         
         # Send welcome email
         if email_verified:
-            send_welcome_email(user)
+            try:
+                from app.tasks.email_tasks import send_welcome_email
+                send_welcome_email.delay(user.id)
+            except Exception:
+                pass
         
         # Log user in
         login_user(user, remember=True)

@@ -250,10 +250,70 @@ def download_conversion(conversion_uuid):
         flash('Conversion is not ready for download.', 'error')
         return redirect(url_for('converter.processing', conversion_uuid=conversion_uuid))
     
-    if not conversion.download_url or not os.path.exists(conversion.download_url):
-        flash('Download file not found. Please try generating the conversion again.', 'error')
+    # Check if conversion has generated content
+    if not conversion.generated_html:
+        flash('No generated content available for download.', 'error')
         return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
     
+    # Generate ZIP on-the-fly if file doesn't exist
+    if not conversion.download_url or not os.path.exists(conversion.download_url):
+        try:
+            # Generate ZIP package dynamically
+            import tempfile
+            import zipfile
+            from io import BytesIO
+            
+            # Create in-memory ZIP
+            zip_buffer = BytesIO()
+            
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                # Add HTML file
+                if conversion.generated_html:
+                    zip_file.writestr('index.html', conversion.generated_html)
+                
+                # Add CSS file  
+                if conversion.generated_css:
+                    zip_file.writestr('styles.css', conversion.generated_css)
+                
+                # Add JS file
+                if conversion.generated_js:
+                    zip_file.writestr('script.js', conversion.generated_js)
+                
+                # Add README
+                readme_content = f"""# Conversion: {conversion.original_filename}
+
+Generated on: {conversion.created_at.strftime('%Y-%m-%d %H:%M:%S')}
+Framework: {conversion.framework}
+CSS Framework: {conversion.css_framework or 'None'}
+
+## Files:
+- index.html - Main HTML file
+- styles.css - CSS styles
+- script.js - JavaScript code
+
+## Usage:
+Open index.html in a web browser to view the converted design.
+"""
+                zip_file.writestr('README.md', readme_content)
+            
+            zip_buffer.seek(0)
+            
+            # Return the ZIP file
+            from flask import Response
+            return Response(
+                zip_buffer.getvalue(),
+                mimetype='application/zip',
+                headers={
+                    'Content-Disposition': f'attachment; filename=conversion_{conversion_uuid}.zip'
+                }
+            )
+            
+        except Exception as e:
+            current_app.logger.error(f'Error generating download package for {conversion_uuid}: {str(e)}')
+            flash('Error generating download package. Please try again.', 'error')
+            return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+    
+    # Use existing file if it exists
     try:
         return send_file(
             conversion.download_url,
@@ -278,10 +338,29 @@ def preview_conversion(conversion_uuid):
     ).first()
     
     if not conversion:
+        current_app.logger.error(f'Conversion not found: {conversion_uuid}')
         abort(404)
     
     if conversion.status != 'completed':
+        current_app.logger.error(f'Conversion not completed: {conversion_uuid}, status: {conversion.status}')
         abort(404)
+    
+    # Check if generated content exists
+    if not conversion.generated_html:
+        current_app.logger.error(f'No generated HTML for conversion: {conversion_uuid}')
+        # Return a simple error page instead of aborting
+        from flask import Response
+        error_html = """
+        <html>
+        <head><title>Preview Not Available</title></head>
+        <body style="font-family: Arial, sans-serif; padding: 50px; text-align: center;">
+            <h1>Preview Not Available</h1>
+            <p>This conversion doesn't have generated code available for preview.</p>
+            <p>Conversion Status: """ + conversion.status + """</p>
+        </body>
+        </html>
+        """
+        return Response(error_html, mimetype='text/html')
     
     if conversion.preview_url and os.path.exists(conversion.preview_url):
         return send_file(conversion.preview_url)
@@ -295,12 +374,24 @@ def preview_conversion(conversion_uuid):
             conversion.generated_js or ''
         )
         
+        current_app.logger.info(f'Generated preview for conversion: {conversion_uuid}')
         from flask import Response
         return Response(preview_html, mimetype='text/html')
         
     except Exception as e:
         current_app.logger.error(f'Error generating preview for {conversion_uuid}: {str(e)}')
-        abort(500)
+        from flask import Response
+        error_html = f"""
+        <html>
+        <head><title>Preview Error</title></head>
+        <body style="font-family: Arial, sans-serif; padding: 50px; text-align: center;">
+            <h1>Preview Error</h1>
+            <p>There was an error generating the preview.</p>
+            <p>Error: {str(e)}</p>
+        </body>
+        </html>
+        """
+        return Response(error_html, mimetype='text/html')
 
 
 @converter.route('/feedback/<conversion_uuid>', methods=['POST'])
@@ -365,3 +456,41 @@ def submit_feedback(conversion_uuid):
     else:
         flash('Please correct the errors and try again.', 'error')
         return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+
+
+@converter.route('/retry/<conversion_uuid>')
+@login_required
+def retry(conversion_uuid):
+    """Retry a failed conversion."""
+    conversion = Conversion.query.filter_by(
+        uuid=conversion_uuid,
+        account_id=current_user.id
+    ).first()
+    
+    if not conversion:
+        flash('Conversion not found.', 'error')
+        return redirect(url_for('account.history'))
+    
+    if conversion.status != 'failed':
+        flash('This conversion is not in a failed state.', 'error')
+        return redirect(url_for('account.history'))
+    
+    if conversion.retry_count >= 3:
+        flash('Maximum retry attempts exceeded.', 'error')
+        return redirect(url_for('account.history'))
+    
+    try:
+        # Start retry task
+        from app.tasks.conversion_tasks import retry_failed_conversion
+        import threading
+        thread = threading.Thread(target=retry_failed_conversion, args=[conversion_uuid])
+        thread.daemon = True
+        thread.start()
+        
+        flash('Conversion retry started. You will be notified when it completes.', 'success')
+        
+    except Exception as e:
+        current_app.logger.error(f"Error retrying conversion: {e}")
+        flash('Failed to retry conversion. Please try again.', 'error')
+    
+    return redirect(url_for('account.history'))
