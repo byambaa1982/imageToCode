@@ -2,6 +2,7 @@
 """Database models."""
 
 import uuid
+from decimal import Decimal
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 from app.extensions import db, bcrypt
@@ -89,12 +90,13 @@ class Account(UserMixin, db.Model):
         if not self.has_credits(amount):
             raise ValueError('Insufficient credits')
         
-        self.credits_remaining -= amount
+        amount_decimal = Decimal(str(amount))
+        self.credits_remaining -= amount_decimal
         
         # Create transaction record
         transaction = CreditsTransaction(
             account_id=self.id,
-            amount=-amount,
+            amount=-amount_decimal,
             balance_after=self.credits_remaining,
             transaction_type='usage',
             description=description
@@ -104,13 +106,14 @@ class Account(UserMixin, db.Model):
     
     def add_credits(self, amount, description='Credit purchase', order_id=None):
         """Add credits to account."""
-        self.credits_remaining += amount
+        amount_decimal = Decimal(str(amount))
+        self.credits_remaining += amount_decimal
         
         # Create transaction record
         transaction = CreditsTransaction(
             account_id=self.id,
             order_id=order_id,
-            amount=amount,
+            amount=amount_decimal,
             balance_after=self.credits_remaining,
             transaction_type='purchase',
             description=description

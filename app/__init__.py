@@ -15,9 +15,9 @@ def create_app(config_name='development'):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     
-    # Reduce logging verbosity
+    # Reduce logging verbosity (but keep INFO for startup messages)
     log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
+    log.setLevel(logging.INFO)
     
     # Disable SQLAlchemy logging
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)

@@ -70,7 +70,7 @@ class Config:
     # AI API
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
     ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
-    AI_MODEL = os.environ.get('AI_MODEL') or 'gpt-4-vision-preview'
+    AI_MODEL = os.environ.get('AI_MODEL') or 'gpt-4o'
     
     # Stripe
     STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')

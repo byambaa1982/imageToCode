@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Dict, Optional, Tuple
 
-import openai
+from openai import OpenAI
 from anthropic import Anthropic
 from PIL import Image
 
@@ -27,12 +27,19 @@ class AIService:
         
         # Initialize OpenAI client
         if Config.OPENAI_API_KEY:
-            openai.api_key = Config.OPENAI_API_KEY
-            self.openai_client = openai
+            try:
+                self.openai_client = OpenAI(api_key=Config.OPENAI_API_KEY)
+                logger.info("OpenAI client initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize OpenAI client: {str(e)}")
         
-        # Initialize Anthropic client
-        if Config.ANTHROPIC_API_KEY:
-            self.anthropic_client = Anthropic(api_key=Config.ANTHROPIC_API_KEY)
+        # Initialize Anthropic client (only if valid key)
+        if Config.ANTHROPIC_API_KEY and not Config.ANTHROPIC_API_KEY.startswith('sk-ant-your-'):
+            try:
+                self.anthropic_client = Anthropic(api_key=Config.ANTHROPIC_API_KEY)
+                logger.info("Anthropic client initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize Anthropic client: {str(e)}")
     
     def convert_screenshot_to_code(
         self,
@@ -64,7 +71,7 @@ class AIService:
             
             # Choose model
             if not model:
-                model = Config.AI_MODEL or 'gpt-4-vision-preview'
+                model = Config.AI_MODEL or 'gpt-4o'
             
             # Make AI request
             start_time = time.time()
@@ -76,7 +83,7 @@ class AIService:
             else:
                 # Fallback to OpenAI if available
                 if self.openai_client:
-                    result = self._call_openai(prompt, processed_image, 'gpt-4-vision-preview')
+                    result = self._call_openai(prompt, processed_image, 'gpt-4o')
                 else:
                     return {'error': 'No AI service available'}
             
@@ -276,7 +283,7 @@ Make sure to:
             API response with content and metadata
         """
         try:
-            response = self.openai_client.ChatCompletion.create(
+            response = self.openai_client.chat.completions.create(
                 model=model,
                 messages=[
                     {
