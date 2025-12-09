@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful - Screenshot to Code{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-lg shadow-xl p-8 text-center">
+            <!-- Success Icon -->
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-check text-4xl text-green-600"></i>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                Payment Successful!
+            </h1>
+            
+            <p class="text-lg text-gray-600 mb-8">
+                Your credits have been added to your account.
+            </p>
+            
+            {% if order %}
+            <div class="bg-gray-50 rounded-lg p-6 mb-8 text-left">
+                <h3 class="font-semibold text-gray-900 mb-4">Order Details</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Package:</span>
+                        <span class="font-medium text-gray-900">{{ order.package_type.replace('_', ' ').title() }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Credits:</span>
+                        <span class="font-medium text-gray-900">{{ order.credits_purchased|int }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Amount:</span>
+                        <span class="font-medium text-gray-900">${{ "%.2f"|format(order.amount) }}</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-gray-200">
+                        <span class="text-gray-600">Current Balance:</span>
+                        <span class="font-bold text-purple-600">{{ current_user.credits_remaining|int }} credits</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-purple-50 rounded-lg p-6 mb-8">
+                <p class="text-lg font-semibold text-purple-900">
+                    Current Balance: {{ current_user.credits_remaining|int }} credits
+                </p>
+            </div>
+            {% endif %}
+            
+            <div class="space-y-3">
+                <a href="{{ url_for('converter.upload') }}" class="block w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                    <i class="fas fa-upload mr-2"></i>
+                    Start Converting
+                </a>
+                
+                <a href="{{ url_for('account.dashboard') }}" class="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    Go to Dashboard
+                </a>
+            </div>
+            
+            <div class="mt-8 text-sm text-gray-500">
+                <p>A receipt has been sent to your email.</p>
+                <p class="mt-2">
+                    <a href="{{ url_for('payment.history') }}" class="text-purple-600 hover:text-purple-700">
+                        View Purchase History
+                    </a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h3 class="font-bold text-gray-900 mb-4">What's Next?</h3>
+            <ul class="space-y-3 text-sm text-gray-600">
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-purple-600 mt-1 mr-3"></i>
+                    <span>Upload any UI screenshot or design mockup</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-purple-600 mt-1 mr-3"></i>
+                    <span>Choose your preferred framework (React, Vue, HTML, etc.)</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-purple-600 mt-1 mr-3"></i>
+                    <span>Get production-ready code in 30-60 seconds</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}

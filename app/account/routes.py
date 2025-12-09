@@ -62,4 +62,11 @@ def settings():
 @login_required
 def billing():
     """Billing and transaction history."""
-    return render_template('account/billing.html')
+    from app.models import CreditsTransaction
+    
+    # Get all transactions for the user, ordered by most recent
+    transactions = CreditsTransaction.query.filter_by(
+        account_id=current_user.id
+    ).order_by(CreditsTransaction.created_at.desc()).all()
+    
+    return render_template('account/billing.html', transactions=transactions)

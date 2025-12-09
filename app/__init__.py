@@ -1,6 +1,7 @@
 # app/__init__.py
 """Flask application factory."""
 
+import logging
 from flask import Flask
 from app.extensions import db, login_manager, migrate, csrf, mail, bcrypt
 from config import config
@@ -13,6 +14,13 @@ def create_app(config_name='development'):
     # Load configuration
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
+    
+    # Reduce logging verbosity (but keep INFO for startup messages)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.INFO)
+    
+    # Disable SQLAlchemy logging
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
     
     # Initialize extensions
     db.init_app(app)
