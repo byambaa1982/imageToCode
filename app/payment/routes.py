@@ -37,14 +37,14 @@ def checkout(package_code):
     package = Package.query.filter_by(code=package_code, is_active=True).first_or_404()
     
     try:
-        current_app.logger.info(f"Creating checkout session for user {current_user.id}, package {package_code}")
+        # current_app.logger.info(f"Creating checkout session for user {current_user.id}, package {package_code}")
         
         # Create Stripe checkout session
         session = create_checkout_session(package.code, current_user.id)
         
-        current_app.logger.info(f"Checkout session created: {session.id}")
+        # current_app.logger.info(f"Checkout session created: {session.id}")
         
-        # Redirect to Stripe checkout
+        # Redirect to Stripe Checkout
         return redirect(session.url, code=303)
         
     except ValueError as e:

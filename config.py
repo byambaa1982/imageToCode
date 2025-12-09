@@ -131,7 +131,7 @@ class Config:
                 local_bind_address=('127.0.0.1', 3307)
             )
             cls._ssh_tunnel.start()
-            print(f"SSH tunnel started on local port {cls._ssh_tunnel.local_bind_port}")
+            # print(f"SSH tunnel started on local port {cls._ssh_tunnel.local_bind_port}")
         return cls._ssh_tunnel
     
     @classmethod
@@ -139,7 +139,7 @@ class Config:
         """Stop SSH tunnel."""
         if cls._ssh_tunnel:
             cls._ssh_tunnel.stop()
-            print("SSH tunnel stopped")
+            # print("SSH tunnel stopped")
     
     @classmethod
     def get_mysql_uri(cls):
@@ -148,7 +148,7 @@ class Config:
         
         if cls.is_on_pythonanywhere():
             # Direct connection on PythonAnywhere
-            print("Running on PythonAnywhere - using direct MySQL connection")
+            # print("Running on PythonAnywhere - using direct MySQL connection")
             return (
                 f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
                 f"@{cls.DB_HOST}/{cls.DB_NAME}"
@@ -156,7 +156,7 @@ class Config:
             )
         else:
             # Local development - use SSH tunnel
-            print("Running locally - using SSH tunnel to PythonAnywhere")
+            # print("Running locally - using SSH tunnel to PythonAnywhere")
             tunnel = cls.start_ssh_tunnel()
             if tunnel and tunnel.is_active:
                 return (
@@ -165,7 +165,7 @@ class Config:
                     f"?charset=utf8mb4"
                 )
             else:
-                print("Warning: SSH tunnel not available, falling back to direct connection")
+                # print("Warning: SSH tunnel not available, falling back to direct connection")
                 return (
                     f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
                     f"@{cls.DB_HOST}/{cls.DB_NAME}"
@@ -178,7 +178,7 @@ class Config:
         # Set the database URI dynamically
         if app.config.get('SQLALCHEMY_DATABASE_URI') is None:
             app.config['SQLALCHEMY_DATABASE_URI'] = Config.get_mysql_uri()
-        print(f"Database URI configured: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1] if '@' in app.config['SQLALCHEMY_DATABASE_URI'] else 'Unknown'}")
+        # print(f"Database URI configured: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1] if '@' in app.config['SQLALCHEMY_DATABASE_URI'] else 'Unknown'}")
 
 
 class DevelopmentConfig(Config):
@@ -186,7 +186,7 @@ class DevelopmentConfig(Config):
     
     DEBUG = True
     TESTING = False
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False  # Disabled to reduce log verbosity
     SESSION_COOKIE_SECURE = False
     SQLALCHEMY_POOL_SIZE = 10
     SQLALCHEMY_MAX_OVERFLOW = 20

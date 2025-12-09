@@ -32,7 +32,7 @@ def init_stripe():
         raise ValueError("STRIPE_SECRET_KEY is not configured")
     
     stripe.api_key = api_key
-    current_app.logger.debug(f"Stripe initialized with key: {stripe.api_key[:7]}...")
+    # current_app.logger.debug(f"Stripe initialized with key: {stripe.api_key[:7]}...")
 
 
 def create_checkout_session(package_code, account_id):
