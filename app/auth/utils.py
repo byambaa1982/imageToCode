@@ -4,10 +4,66 @@
 import secrets
 import hashlib
 from datetime import datetime, timedelta
-from flask import url_for, current_app
+from flask import url_for, current_app, request
 from flask_mail import Message
 from app.extensions import db, mail, bcrypt
 from app.models import PasswordResetToken, EmailVerificationToken
+
+
+def get_client_ip():
+    """Get the client's IP address."""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0]
+    return request.remote_addr or 'unknown'
+
+
+def log_account_activity(account_id, activity_type, metadata=None):
+    """Log account activity for security and auditing.
+    
+    Args:
+        account_id: The account ID (can be None for failed logins)
+        activity_type: Type of activity (login_success, login_failed, account_created, etc.)
+        metadata: Additional data to store as JSON
+    """
+    try:
+        from app.models import AnalyticsEvent
+        
+        event = AnalyticsEvent(
+            account_id=account_id,
+            event_type=activity_type,
+            event_data=metadata or {},
+            ip_address=get_client_ip(),
+            user_agent=request.headers.get('User-Agent', 'unknown')[:500] if request else None
+        )
+        db.session.add(event)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(f'Failed to log activity: {str(e)}')
+        # Don't raise exception - logging failure shouldn't break the flow
+
+
+def cleanup_expired_tokens():
+    """Clean up expired password reset and email verification tokens."""
+    try:
+        now = datetime.utcnow()
+        
+        # Delete expired password reset tokens
+        expired_reset = PasswordResetToken.query.filter(
+            PasswordResetToken.expires_at < now
+        ).delete()
+        
+        # Delete expired verification tokens
+        expired_verify = EmailVerificationToken.query.filter(
+            EmailVerificationToken.expires_at < now
+        ).delete()
+        
+        db.session.commit()
+        
+        return expired_reset, expired_verify
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Failed to cleanup tokens: {str(e)}')
+        return 0, 0
 
 
 def generate_token():

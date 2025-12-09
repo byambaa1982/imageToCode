@@ -2,7 +2,16 @@
 """Application configuration."""
 
 import os
+import socket
+import urllib.parse
 from datetime import timedelta
+
+# Only import SSH tunnel if needed (for local development against production DB)
+try:
+    from sshtunnel import SSHTunnelForwarder
+    SSH_AVAILABLE = True
+except ImportError:
+    SSH_AVAILABLE = False
 
 
 class Config:
@@ -11,10 +20,25 @@ class Config:
     # Flask
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
+    # MySQL/PythonAnywhere configuration
+    SSH_HOST = 'ssh.pythonanywhere.com'
+    SSH_USERNAME = 'byambaa1982'
+    SSH_PASSWORD = os.environ.get('SSH_PASSWORD') or 'Python@1982'
+    DB_HOST = 'byambaa1982.mysql.pythonanywhere-services.com'
+    DB_USER = 'byambaa1982'
+    DB_PASSWORD = os.environ.get('DB_PASSWORD') or 'Mysql@1982'
+    DB_NAME = 'byambaa1982$codemirror'
+    
+    # SSH tunnel (for local development)
+    _ssh_tunnel = None
+    _is_on_pythonanywhere = None
+    
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///screenshot_to_code.db'
+    SQLALCHEMY_DATABASE_URI = None  # Will be set dynamically
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
+    SQLALCHEMY_POOL_PRE_PING = True
+    SQLALCHEMY_POOL_RECYCLE = 280
     
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
@@ -75,10 +99,82 @@ class Config:
     FREE_CREDITS_ON_SIGNUP = 3.0
     CREDITS_PER_CONVERSION = 1.0
     
+    @classmethod
+    def is_on_pythonanywhere(cls):
+        """Check if we're running on PythonAnywhere."""
+        if cls._is_on_pythonanywhere is None:
+            hostname = socket.gethostname()
+            cls._is_on_pythonanywhere = (
+                'pythonanywhere' in hostname.lower() or
+                os.getenv('PYTHONANYWHERE_SITE') is not None or
+                os.path.exists('/home/byambaa1982')
+            )
+        return cls._is_on_pythonanywhere
+    
+    @classmethod
+    def start_ssh_tunnel(cls):
+        """Start SSH tunnel (only for local development)."""
+        if not SSH_AVAILABLE:
+            print("Warning: sshtunnel package not available. Install with: pip install sshtunnel")
+            return None
+        
+        if cls._ssh_tunnel is None or not cls._ssh_tunnel.is_active:
+            cls._ssh_tunnel = SSHTunnelForwarder(
+                (cls.SSH_HOST, 22),
+                ssh_username=cls.SSH_USERNAME,
+                ssh_password=cls.SSH_PASSWORD,
+                remote_bind_address=(cls.DB_HOST, 3306),
+                local_bind_address=('127.0.0.1', 3307)
+            )
+            cls._ssh_tunnel.start()
+            print(f"SSH tunnel started on local port {cls._ssh_tunnel.local_bind_port}")
+        return cls._ssh_tunnel
+    
+    @classmethod
+    def stop_ssh_tunnel(cls):
+        """Stop SSH tunnel."""
+        if cls._ssh_tunnel:
+            cls._ssh_tunnel.stop()
+            print("SSH tunnel stopped")
+    
+    @classmethod
+    def get_mysql_uri(cls):
+        """Get MySQL URI based on environment."""
+        encoded_password = urllib.parse.quote(cls.DB_PASSWORD)
+        
+        if cls.is_on_pythonanywhere():
+            # Direct connection on PythonAnywhere
+            print("Running on PythonAnywhere - using direct MySQL connection")
+            return (
+                f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
+                f"@{cls.DB_HOST}/{cls.DB_NAME}"
+                f"?charset=utf8mb4"
+            )
+        else:
+            # Local development - use SSH tunnel
+            print("Running locally - using SSH tunnel to PythonAnywhere")
+            tunnel = cls.start_ssh_tunnel()
+            if tunnel and tunnel.is_active:
+                return (
+                    f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
+                    f"@127.0.0.1:{tunnel.local_bind_port}/{cls.DB_NAME}"
+                    f"?charset=utf8mb4"
+                )
+            else:
+                print("Warning: SSH tunnel not available, falling back to direct connection")
+                return (
+                    f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
+                    f"@{cls.DB_HOST}/{cls.DB_NAME}"
+                    f"?charset=utf8mb4"
+                )
+    
     @staticmethod
     def init_app(app):
         """Initialize application."""
-        pass
+        # Set the database URI dynamically
+        if app.config.get('SQLALCHEMY_DATABASE_URI') is None:
+            app.config['SQLALCHEMY_DATABASE_URI'] = Config.get_mysql_uri()
+        print(f"Database URI configured: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1] if '@' in app.config['SQLALCHEMY_DATABASE_URI'] else 'Unknown'}")
 
 
 class DevelopmentConfig(Config):
@@ -88,9 +184,16 @@ class DevelopmentConfig(Config):
     TESTING = False
     SQLALCHEMY_ECHO = True
     SESSION_COOKIE_SECURE = False
+    SQLALCHEMY_POOL_SIZE = 10
+    SQLALCHEMY_MAX_OVERFLOW = 20
+    SQLALCHEMY_POOL_TIMEOUT = 30
     
     @classmethod
     def init_app(cls, app):
+        # Set database URI before calling parent init_app
+        if app.config.get('SQLALCHEMY_DATABASE_URI') is None:
+            app.config['SQLALCHEMY_DATABASE_URI'] = cls.get_mysql_uri()
+        
         Config.init_app(app)
         
         # Create upload folder if it doesn't exist
@@ -112,9 +215,27 @@ class ProductionConfig(Config):
     
     DEBUG = False
     TESTING = False
+    # Optimized for PythonAnywhere
+    SQLALCHEMY_POOL_SIZE = 5
+    SQLALCHEMY_MAX_OVERFLOW = 10
+    SQLALCHEMY_POOL_RECYCLE = 280
+    SQLALCHEMY_POOL_TIMEOUT = 20
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+        'connect_args': {
+            'connect_timeout': 10,
+            'read_timeout': 30,
+            'write_timeout': 30,
+        }
+    }
     
     @classmethod
     def init_app(cls, app):
+        # Set database URI before calling parent init_app
+        if app.config.get('SQLALCHEMY_DATABASE_URI') is None:
+            app.config['SQLALCHEMY_DATABASE_URI'] = cls.get_mysql_uri()
+        
         Config.init_app(app)
         
         # Log to stderr
