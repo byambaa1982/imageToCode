@@ -123,15 +123,48 @@ class Config:
             return None
         
         if cls._ssh_tunnel is None or not cls._ssh_tunnel.is_active:
-            cls._ssh_tunnel = SSHTunnelForwarder(
-                (cls.SSH_HOST, 22),
-                ssh_username=cls.SSH_USERNAME,
-                ssh_password=cls.SSH_PASSWORD,
-                remote_bind_address=(cls.DB_HOST, 3306),
-                local_bind_address=('127.0.0.1', 3307)
-            )
-            cls._ssh_tunnel.start()
-            # print(f"SSH tunnel started on local port {cls._ssh_tunnel.local_bind_port}")
+            try:
+                # Try to find an available local port
+                import socket
+                sock = socket.socket()
+                sock.bind(('', 0))
+                available_port = sock.getsockname()[1]
+                sock.close()
+                
+                cls._ssh_tunnel = SSHTunnelForwarder(
+                    (cls.SSH_HOST, 22),
+                    ssh_username=cls.SSH_USERNAME,
+                    ssh_password=cls.SSH_PASSWORD,
+                    ssh_pkey=None,  # Disable SSH key authentication
+                    ssh_private_key_password=None,  # Disable SSH key password
+                    remote_bind_address=(cls.DB_HOST, 3306),
+                    local_bind_address=('127.0.0.1', available_port),
+                    allow_agent=False,  # Disable SSH agent
+                    host_pkey_directories=[],  # Don't look for host keys
+                    set_keepalive=30.0  # Keep connection alive
+                )
+                
+                print(f"🔄 Starting SSH tunnel on port {available_port}...")
+                cls._ssh_tunnel.start()
+                
+                # Verify the tunnel is actually working
+                import time
+                time.sleep(2)  # Give tunnel time to establish
+                
+                if cls._ssh_tunnel.is_active:
+                    print(f"✓ SSH tunnel started successfully on local port {cls._ssh_tunnel.local_bind_port}")
+                else:
+                    raise Exception("Tunnel failed to become active")
+                    
+            except Exception as e:
+                print(f"✗ SSH tunnel failed: {e}")
+                if cls._ssh_tunnel:
+                    try:
+                        cls._ssh_tunnel.stop()
+                    except:
+                        pass
+                cls._ssh_tunnel = None
+                return None
         return cls._ssh_tunnel
     
     @classmethod
@@ -148,29 +181,48 @@ class Config:
         
         if cls.is_on_pythonanywhere():
             # Direct connection on PythonAnywhere
-            # print("Running on PythonAnywhere - using direct MySQL connection")
+            print("✓ Running on PythonAnywhere - using direct MySQL connection")
             return (
                 f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
                 f"@{cls.DB_HOST}/{cls.DB_NAME}"
                 f"?charset=utf8mb4"
             )
         else:
-            # Local development - use SSH tunnel
-            # print("Running locally - using SSH tunnel to PythonAnywhere")
-            tunnel = cls.start_ssh_tunnel()
-            if tunnel and tunnel.is_active:
-                return (
-                    f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
-                    f"@127.0.0.1:{tunnel.local_bind_port}/{cls.DB_NAME}"
-                    f"?charset=utf8mb4"
-                )
-            else:
-                # print("Warning: SSH tunnel not available, falling back to direct connection")
-                return (
-                    f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
-                    f"@{cls.DB_HOST}/{cls.DB_NAME}"
-                    f"?charset=utf8mb4"
-                )
+            # Local development - SSH tunnel is required
+            print("🔄 Running locally - SSH tunnel required for PythonAnywhere MySQL")
+            
+            # Try multiple times to establish tunnel
+            max_attempts = 3
+            for attempt in range(1, max_attempts + 1):
+                print(f"   Attempt {attempt}/{max_attempts}...")
+                tunnel = cls.start_ssh_tunnel()
+                
+                if tunnel and tunnel.is_active:
+                    print(f"✓ Using SSH tunnel on port {tunnel.local_bind_port}")
+                    return (
+                        f"mysql+pymysql://{cls.DB_USER}:{encoded_password}"
+                        f"@127.0.0.1:{tunnel.local_bind_port}/{cls.DB_NAME}"
+                        f"?charset=utf8mb4&connect_timeout=30"
+                    )
+                else:
+                    if attempt < max_attempts:
+                        print(f"   Tunnel attempt {attempt} failed, retrying...")
+                        import time
+                        time.sleep(2)
+                    
+            # If all tunnel attempts fail, raise an informative error
+            error_msg = (
+                "❌ Failed to establish SSH tunnel to PythonAnywhere MySQL server.\n"
+                "   This is required for external connections to PythonAnywhere databases.\n"
+                "   Please check:\n"
+                "   1. SSH credentials in .env file\n"
+                "   2. Network connectivity\n"
+                "   3. PythonAnywhere SSH access\n"
+                "   \n"
+                "   For local development, consider using SQLite instead:\n"
+                "   Set DATABASE_URL=sqlite:///screenshot_to_code.db in your .env file"
+            )
+            raise Exception(error_msg)
     
     @staticmethod
     def init_app(app):
