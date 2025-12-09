@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Cancelled - Screenshot to Code{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-lg shadow-xl p-8 text-center">
+            <!-- Cancel Icon -->
+            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-times text-4xl text-yellow-600"></i>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                Payment Cancelled
+            </h1>
+            
+            <p class="text-lg text-gray-600 mb-8">
+                Your payment was cancelled. No charges were made to your account.
+            </p>
+            
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <p class="text-sm text-gray-600">
+                    Need help with the checkout process? We're here to assist you!
+                </p>
+            </div>
+            
+            <div class="space-y-3">
+                <a href="{{ url_for('payment.pricing') }}" class="block w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Return to Pricing
+                </a>
+                
+                <a href="{{ url_for('account.dashboard') }}" class="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    Go to Dashboard
+                </a>
+            </div>
+            
+            {% if current_user.is_authenticated and current_user.credits_remaining > 0 %}
+            <div class="mt-8 bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <p class="text-sm text-purple-900">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    You have <strong>{{ current_user.credits_remaining|int }} credits</strong> remaining.
+                    <a href="{{ url_for('converter.upload') }}" class="underline hover:no-underline">Start converting now</a>
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Help Section -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h3 class="font-bold text-gray-900 mb-4">Why Choose Us?</h3>
+            <ul class="space-y-3 text-sm text-gray-600">
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                    <span><strong>No Subscription:</strong> Pay only for what you use</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                    <span><strong>Credits Never Expire:</strong> Use them at your own pace</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                    <span><strong>High Quality Code:</strong> Production-ready output every time</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                    <span><strong>Multiple Frameworks:</strong> React, Vue, HTML, and more</span>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Contact Support -->
+        <div class="mt-6 text-center text-sm text-gray-500">
+            <p>
+                Need assistance? 
+                <a href="mailto:support@screenshot-to-code.com" class="text-purple-600 hover:text-purple-700">
+                    Contact Support
+                </a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

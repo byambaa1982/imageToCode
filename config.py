@@ -5,6 +5,10 @@ import os
 import socket
 import urllib.parse
 from datetime import timedelta
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Only import SSH tunnel if needed (for local development against production DB)
 try:

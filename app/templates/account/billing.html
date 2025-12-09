@@ -3,13 +3,176 @@
 {% block title %}Billing - Screenshot to Code{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">Billing & Transactions</h1>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Billing & Transactions</h1>
+        <p class="text-gray-600 mt-2">View your credit balance and transaction history</p>
+    </div>
     
-    <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-gray-500 text-center py-8">
-            Transaction history will be displayed here in Phase 3.
-        </p>
+    <!-- Credit Balance Card -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-lg p-8 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-purple-100 text-sm">Current Balance</p>
+                    <p class="text-5xl font-bold mt-2">{{ current_user.credits_remaining|int }}</p>
+                    <p class="text-purple-100 text-sm mt-1">credits available</p>
+                </div>
+                <div class="text-6xl opacity-20">
+                    <i class="fas fa-coins"></i>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-purple-400">
+                <a href="{{ url_for('payment.pricing') }}" class="inline-block bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    <i class="fas fa-plus mr-2"></i>Buy Credits
+                </a>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total Conversions</span>
+                    <span class="text-2xl font-bold text-gray-900">{{ current_user.conversions.count() }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Credits Used</span>
+                    <span class="text-2xl font-bold text-gray-900">
+                        {{ transactions|selectattr('transaction_type', 'equalto', 'usage')|map(attribute='amount')|map('abs')|sum|int }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Credits Purchased</span>
+                    <span class="text-2xl font-bold text-green-600">
+                        {{ transactions|selectattr('transaction_type', 'equalto', 'purchase')|map(attribute='amount')|sum|int }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transaction History -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">Transaction History</h2>
+        </div>
+        
+        {% if transactions %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Type
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Balance
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for transaction in transactions %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ transaction.created_at.strftime('%b %d, %Y') }}
+                            <div class="text-xs text-gray-500">
+                                {{ transaction.created_at.strftime('%I:%M %p') }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {{ transaction.description }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if transaction.transaction_type == 'purchase' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    <i class="fas fa-plus mr-1"></i> Purchase
+                                </span>
+                            {% elif transaction.transaction_type == 'usage' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <i class="fas fa-minus mr-1"></i> Usage
+                                </span>
+                            {% elif transaction.transaction_type == 'refund' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-undo mr-1"></i> Refund
+                                </span>
+                            {% elif transaction.transaction_type == 'bonus' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    <i class="fas fa-gift mr-1"></i> Bonus
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ transaction.transaction_type|title }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            {% if transaction.amount > 0 %}
+                                <span class="font-semibold text-green-600">+{{ transaction.amount|int }}</span>
+                            {% else %}
+                                <span class="font-semibold text-red-600">{{ transaction.amount|int }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                            {{ transaction.balance_after|int }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-receipt text-3xl text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No Transactions Yet</h3>
+            <p class="text-gray-600 mb-6">
+                Your transaction history will appear here once you make purchases or use credits.
+            </p>
+            <a href="{{ url_for('payment.pricing') }}" class="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                <i class="fas fa-plus mr-2"></i>Buy Credits
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Purchase History Link -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('payment.history') }}" class="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium">
+            <i class="fas fa-shopping-cart mr-2"></i>
+            View Purchase History
+        </a>
+    </div>
+    
+    <!-- Help Section -->
+    <div class="mt-8 bg-blue-50 rounded-lg p-6">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-lg font-semibold text-blue-900 mb-2">About Credits</h3>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li>• 1 credit = 1 screenshot conversion</li>
+                    <li>• Credits never expire - use them anytime</li>
+                    <li>• Credits accumulate - buy multiple packs</li>
+                    <li>• Refunds add credits back to your account</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
