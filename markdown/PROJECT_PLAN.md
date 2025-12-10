@@ -2,6 +2,11 @@
 
 ## 🎯 Project Overview
 
+## Rules:
+1. Save all documentation and markdown files in the `markdown` folder only.
+2. Save all files for test in the `tests` folder only. 
+
+
 **Product**: AI-powered web application that converts UI screenshots into production-ready code (React, Vue, HTML/CSS/JavaScript)
 
 **Technology Stack**:
