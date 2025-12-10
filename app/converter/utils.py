@@ -14,6 +14,23 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 
+def validate_framework(framework: str) -> bool:
+    """
+    Validate if the framework is supported.
+    
+    Args:
+        framework: Framework name to validate
+        
+    Returns:
+        True if framework is supported, False otherwise
+    """
+    supported_frameworks = [
+        'react', 'vue', 'html', 'svelte', 'angular', 
+        'nextjs', 'nuxt', 'bootstrap', 'tailwind'
+    ]
+    return framework.lower() in supported_frameworks
+
+
 def allowed_file(filename: str) -> bool:
     """
     Check if file extension is allowed.
@@ -24,8 +41,9 @@ def allowed_file(filename: str) -> bool:
     Returns:
         True if file extension is allowed
     """
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+    if not filename or '.' not in filename:
+        return False
+    return filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 
 def validate_image_file(file: FileStorage) -> Tuple[bool, Optional[str]]:
