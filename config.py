@@ -189,7 +189,7 @@ class Config:
             )
         else:
             # Local development - SSH tunnel is required
-            print("🔄 Running locally - SSH tunnel required for PythonAnywhere MySQL")
+            print("Running locally - SSH tunnel required for PythonAnywhere MySQL")
             
             # Try multiple times to establish tunnel
             max_attempts = 3
