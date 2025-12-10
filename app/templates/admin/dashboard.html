@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Screenshot to Code{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Admin Header -->
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center gap-3">
+                        <i class="fas fa-shield-alt"></i>
+                        Admin Dashboard
+                    </h1>
+                    <p class="text-purple-100 mt-1">System overview and management</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-purple-100">Last updated</p>
+                    <p class="font-mono text-lg" id="lastUpdated">Just now</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex space-x-8">
+                <a href="{{ url_for('admin.dashboard') }}" class="py-4 px-1 border-b-2 border-purple-600 text-purple-600 font-medium">
+                    <i class="fas fa-chart-line mr-2"></i>Dashboard
+                </a>
+                <a href="{{ url_for('admin.users') }}" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                    <i class="fas fa-users mr-2"></i>Users
+                </a>
+                <a href="{{ url_for('admin.conversions') }}" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                    <i class="fas fa-exchange-alt mr-2"></i>Conversions
+                </a>
+                <a href="{{ url_for('admin.analytics') }}" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                    <i class="fas fa-analytics mr-2"></i>Analytics
+                </a>
+                <a href="{{ url_for('admin.health') }}" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                    <i class="fas fa-heartbeat mr-2"></i>Health
+                </a>
+                <a href="{{ url_for('admin.packages') }}" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                    <i class="fas fa-box mr-2"></i>Packages
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- System Health Alert -->
+        {% if health.stuck_conversions > 0 or health.error_rate > 20 %}
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-red-400 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="text-red-800 font-semibold">System Health Warning</h3>
+                    <ul class="text-red-700 mt-1 text-sm">
+                        {% if health.stuck_conversions > 0 %}
+                        <li>{{ health.stuck_conversions }} stuck conversion(s) detected</li>
+                        {% endif %}
+                        {% if health.error_rate > 20 %}
+                        <li>High error rate: {{ health.error_rate }}%</li>
+                        {% endif %}
+                    </ul>
+                    <a href="{{ url_for('admin.health') }}" class="text-red-600 hover:text-red-800 underline text-sm mt-2 inline-block">
+                        View details →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Key Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Users -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    </div>
+                    <span class="text-sm text-green-600 font-semibold">+{{ stats.users.this_week }} this week</span>
+                </div>
+                <h3 class="text-gray-500 text-sm font-medium">Total Users</h3>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.users.total | default(0) | number_format }}</p>
+                <div class="mt-2 text-xs text-gray-500">
+                    <span>{{ stats.users.today }} today</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ stats.users.verified }} verified</span>
+                </div>
+            </div>
+
+            <!-- Total Conversions -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <i class="fas fa-exchange-alt text-purple-600 text-2xl"></i>
+                    </div>
+                    <span class="text-sm text-green-600 font-semibold">+{{ stats.conversions.this_week }} this week</span>
+                </div>
+                <h3 class="text-gray-500 text-sm font-medium">Total Conversions</h3>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.conversions.total | default(0) | number_format }}</p>
+                <div class="mt-2 text-xs text-gray-500">
+                    <span>{{ stats.conversions.success_rate }}% success</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ stats.conversions.failed }} failed</span>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="fas fa-dollar-sign text-green-600 text-2xl"></i>
+                    </div>
+                    <span class="text-sm text-green-600 font-semibold">${{ "%.2f" | format(stats.revenue.this_week) }} this week</span>
+                </div>
+                <h3 class="text-gray-500 text-sm font-medium">Total Revenue</h3>
+                <p class="text-3xl font-bold text-gray-900 mt-1">${{ "%.2f" | format(stats.revenue.total) }}</p>
+                <div class="mt-2 text-xs text-gray-500">
+                    <span>${{ "%.2f" | format(stats.revenue.today) }} today</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ stats.orders.total }} orders</span>
+                </div>
+            </div>
+
+            <!-- Avg Processing Time -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-yellow-100 p-3 rounded-lg">
+                        <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Last hour</span>
+                </div>
+                <h3 class="text-gray-500 text-sm font-medium">Avg Processing Time</h3>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ "%.1f" | format(stats.conversions.avg_processing_time) }}s</p>
+                <div class="mt-2 text-xs text-gray-500">
+                    <span>{{ stats.conversions.processing }} processing</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ stats.conversions.pending }} pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Details -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Framework Breakdown -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
+                    Framework Popularity
+                </h3>
+                {% if stats.frameworks %}
+                <div class="space-y-3">
+                    {% for framework in stats.frameworks %}
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600 font-medium capitalize">{{ framework.name }}</span>
+                            <span class="text-gray-900 font-semibold">{{ framework.count }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            {% set percentage = (framework.count / stats.conversions.total * 100) if stats.conversions.total > 0 else 0 %}
+                            <div class="bg-purple-600 h-2 rounded-full" style="width: {{ percentage }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-8">No data available</p>
+                {% endif %}
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
+                    <span>
+                        <i class="fas fa-activity text-blue-600 mr-2"></i>
+                        System Status
+                    </span>
+                    <span class="text-xs px-2 py-1 rounded-full {% if health.database == 'healthy' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ health.database }}
+                    </span>
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-database text-blue-500 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-700">Database</span>
+                        </div>
+                        <span class="text-sm font-semibold {% if health.database == 'healthy' %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ health.database }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle text-yellow-500 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-700">Error Rate (1h)</span>
+                        </div>
+                        <span class="text-sm font-semibold {% if health.error_rate < 5 %}text-green-600{% elif health.error_rate < 20 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                            {{ health.error_rate }}%
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-spinner text-purple-500 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-700">Stuck Conversions</span>
+                        </div>
+                        <span class="text-sm font-semibold {% if health.stuck_conversions == 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ health.stuck_conversions }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-lock text-red-500 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-700">Locked Accounts</span>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">
+                            {{ health.locked_accounts }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                Quick Actions
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="{{ url_for('admin.users') }}" class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-users text-blue-600 text-2xl mb-2"></i>
+                    <span class="text-sm font-medium text-gray-700">Manage Users</span>
+                </a>
+                <a href="{{ url_for('admin.conversions', status='failed') }}" class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-times-circle text-red-600 text-2xl mb-2"></i>
+                    <span class="text-sm font-medium text-gray-700">Failed Conversions</span>
+                </a>
+                <a href="{{ url_for('admin.analytics') }}" class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-chart-bar text-green-600 text-2xl mb-2"></i>
+                    <span class="text-sm font-medium text-gray-700">View Analytics</span>
+                </a>
+                <a href="{{ url_for('admin.packages') }}" class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-box text-purple-600 text-2xl mb-2"></i>
+                    <span class="text-sm font-medium text-gray-700">Manage Packages</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh stats every 30 seconds
+setInterval(function() {
+    fetch('{{ url_for("admin.api_stats") }}')
+        .then(response => response.json())
+        .then(data => {
+            // Update stats on page (simplified)
+            document.getElementById('lastUpdated').textContent = 'Just now';
+        })
+        .catch(error => console.error('Error refreshing stats:', error));
+}, 30000);
+
+// Add number formatting filter
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial load timestamp
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+});
+</script>
+{% endblock %}

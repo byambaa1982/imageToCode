@@ -33,6 +33,9 @@ def dev_verify_email():
 def dashboard():
     """Enhanced user dashboard with analytics."""
     try:
+        # Refresh current user data from database to get latest credits
+        db.session.refresh(current_user)
+        
         # Get recent conversions for the dashboard
         recent_conversions = current_user.conversions.order_by(Conversion.created_at.desc()).limit(5).all()
         

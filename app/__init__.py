@@ -61,6 +61,9 @@ def create_app(config_name='development'):
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
     
+    # Register custom Jinja filters
+    register_jinja_filters(app)
+    
     # Register error handlers
     register_error_handlers(app)
     
@@ -68,6 +71,17 @@ def create_app(config_name='development'):
     register_commands(app)
     
     return app
+
+
+def register_jinja_filters(app):
+    """Register custom Jinja filters."""
+    @app.template_filter('number_format')
+    def number_format(value):
+        """Format numbers with thousands separator."""
+        try:
+            return "{:,}".format(int(value))
+        except (ValueError, TypeError):
+            return value
 
 
 def register_error_handlers(app):

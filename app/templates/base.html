@@ -196,6 +196,13 @@
                             Dashboard
                             <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all group-hover:w-full"></span>
                         </a>
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="text-purple-700 hover:text-purple-900 transition-all duration-200 font-medium relative group flex items-center space-x-1">
+                            <i class="fas fa-shield-alt text-sm"></i>
+                            <span>Admin</span>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-700 transition-all group-hover:w-full"></span>
+                        </a>
+                        {% endif %}
                         
                         <div class="flex items-center space-x-4">
                             <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1.5 rounded-full text-sm font-semibold flex items-center space-x-1.5 shadow-sm">
@@ -243,6 +250,11 @@
                     <a href="{{ url_for('account.dashboard') }}" class="block px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 rounded-xl transition-all duration-200 font-medium">
                         <i class="fas fa-tachometer-alt w-5 mr-3 text-gray-400"></i>Dashboard
                     </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-3 text-purple-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 rounded-xl transition-all duration-200 font-medium border border-purple-200">
+                        <i class="fas fa-shield-alt w-5 mr-3"></i>Admin Panel
+                    </a>
+                    {% endif %}
                     
                     <div class="px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
                         <div class="flex items-center text-sm">

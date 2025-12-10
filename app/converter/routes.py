@@ -31,6 +31,9 @@ from app.tasks.conversion_tasks import (
 @login_required
 def upload():
     """Upload page."""
+    # Refresh current user data from database to get latest credits
+    db.session.refresh(current_user)
+    
     # Temporarily disabled for development - re-enable for production
     # if not current_user.email_verified:
     #     flash('Please verify your email address before converting screenshots.', 'warning')
