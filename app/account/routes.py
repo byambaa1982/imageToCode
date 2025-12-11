@@ -185,7 +185,7 @@ def update_profile():
 
 @account.route('/settings/password', methods=['POST'])
 @login_required
-def change_password():
+def update_password():
     """Change user password."""
     current_password = request.form.get('current_password')
     new_password = request.form.get('new_password')
@@ -380,3 +380,32 @@ def billing():
     ).order_by(CreditsTransaction.created_at.desc()).all()
     
     return render_template('account/billing.html', transactions=transactions)
+
+
+@account.route('/transactions')
+@login_required
+def transactions():
+    """View credit transaction history."""
+    try:
+        # Get all transactions for the user, ordered by most recent
+        transactions = CreditsTransaction.query.filter_by(
+            account_id=current_user.id
+        ).order_by(CreditsTransaction.created_at.desc()).all()
+        
+        return render_template('account/transactions.html', transactions=transactions)
+    
+    except Exception as e:
+        current_app.logger.error(f"Error loading transactions: {str(e)}")
+        flash('Unable to load transactions. Please try again.', 'error')
+        return redirect(url_for('account.dashboard'))
+
+
+@account.route('/change-password', methods=['GET', 'POST'])
+@login_required 
+def change_password_page():
+    """Change password page - dedicated route."""
+    if request.method == 'GET':
+        return render_template('account/change_password.html')
+    
+    # For POST requests, redirect to the existing password change handler
+    return redirect(url_for('account.update_password'), code=307)  # 307 preserves POST method

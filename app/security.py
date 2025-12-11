@@ -4,8 +4,9 @@
 import re
 import logging
 from functools import wraps
-from flask import request, abort, current_app
+from flask import request, abort, current_app, session, session
 from werkzeug.exceptions import TooManyRequests
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -278,6 +279,45 @@ class IPWhitelist:
                 abort(403)
             return f(*args, **kwargs)
         return decorated_function
+
+
+def generate_csrf_token():
+    """Generate a CSRF token."""
+    token = secrets.token_urlsafe(32)
+    session['csrf_token'] = token
+    return token
+
+
+def validate_csrf_token(token):
+    """Validate CSRF token."""
+    session_token = session.get('csrf_token')
+    if not session_token:
+        return False
+    
+    return session_token == token
+
+
+def get_csrf_token():
+    """Get current CSRF token or generate new one."""
+    token = session.get('csrf_token')
+    if not token:
+        token = generate_csrf_token()
+    return token
+
+
+def csrf_protect():
+    """Decorator to protect routes with CSRF token validation."""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if request.method == 'POST':
+                token = request.form.get('csrf_token') or request.headers.get('X-CSRF-Token')
+                if not token or not validate_csrf_token(token):
+                    current_app.logger.warning(f'CSRF token validation failed for {request.endpoint}')
+                    return 'CSRF token validation failed', 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 
 def init_security(app):

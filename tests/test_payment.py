@@ -158,8 +158,8 @@ class TestOrderModel:
         with app.app_context():
             order = Order(
                 account_id=test_user.id,
-                package_id=test_package.id,
-                stripe_checkout_session_id='cs_test_123',
+                package_type=test_package.code,  # Use package_type instead of package_id
+                stripe_session_id='cs_test_123',  # Use stripe_session_id instead of stripe_checkout_session_id
                 amount=9.99,
                 credits_purchased=10.0,
                 status='pending'
@@ -178,8 +178,8 @@ class TestOrderModel:
             
             order = Order(
                 account_id=test_user.id,
-                package_id=test_package.id,
-                stripe_checkout_session_id='cs_test_123',
+                package_type=test_package.code,  # Use package_type instead of package_id
+                stripe_session_id='cs_test_123',  # Use stripe_session_id instead of stripe_checkout_session_id
                 amount=9.99,
                 credits_purchased=10.0,
                 status='completed'
