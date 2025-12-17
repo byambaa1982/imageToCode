@@ -380,7 +380,8 @@ These will be addressed in future phases:
 3. **Check database**: Verify MySQL connection and tables
 4. **Test Redis**: Run `redis-cli ping` if using Celery
 5. **Review logs**: Check for specific error traces
-
+ 
+test
 ---
 
 ## ✨ Conclusion
