@@ -3,6 +3,16 @@
 {% block title %}Privacy Policy - Screenshot to Code{% endblock %}
 
 {% block content %}
+<!-- Back Navigation -->
+<div class="bg-white border-b border-gray-200 px-4 py-3">
+    <div class="max-w-7xl mx-auto">
+        <button onclick="goBack()" class="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            <span>Back</span>
+        </button>
+    </div>
+</div>
+
 <!-- Hero Section -->
 <section class="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
@@ -298,3 +308,5 @@
     </div>
 </section>
 {% endblock %}
+
+

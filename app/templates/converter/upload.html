@@ -3,6 +3,26 @@
 {% block title %}Upload - Screenshot to Code{% endblock %}
 
 {% block content %}
+<!-- Navigation Bar with Back Button -->
+<nav class="bg-white border-b border-gray-200 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <!-- Back Button -->
+        <button onclick="goBack()" class="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            <span>Back</span>
+        </button>
+        
+        <!-- Breadcrumb Navigation -->
+        <ol class="flex items-center space-x-2 text-sm text-gray-500">
+            <li><a href="{{ url_for('main.index') }}" class="hover:text-gray-700">Home</a></li>
+            <li><i class="fas fa-chevron-right text-xs"></i></li>
+            <li class="text-gray-900">Upload Screenshot</li>
+        </ol>
+        
+        <div></div> <!-- Spacer for alignment -->
+    </div>
+</nav>
+
 <!-- Upload Section -->
 <section class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

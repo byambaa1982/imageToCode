@@ -62,6 +62,12 @@ def help_center():
     return render_template('main/help.html')
 
 
+@main.route('/user-guide')
+def user_guide():
+    """User Guide page."""
+    return render_template('main/user_guide.html')
+
+
 @main.route('/help/<article>')
 def help_article(article):
     """Individual help articles"""
@@ -89,7 +95,7 @@ def help_article(article):
     
     if article not in articles:
         flash('Help article not found.', 'error')
-        return redirect(url_for('main.help'))
+        return redirect(url_for('main.help_center'))
     
     return render_template('main/help_article.html', 
                          article=article, 

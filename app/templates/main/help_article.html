@@ -4,16 +4,25 @@
 
 {% block content %}
 <div class="min-h-screen bg-gray-50">
-    <!-- Breadcrumb Navigation -->
+    <!-- Navigation Bar -->
     <nav class="bg-white border-b border-gray-200 px-4 py-3">
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <!-- Back Button -->
+            <button onclick="goBack()" class="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span>Back</span>
+            </button>
+            
+            <!-- Breadcrumb Navigation -->
             <ol class="flex items-center space-x-2 text-sm text-gray-500">
                 <li><a href="{{ url_for('main.index') }}" class="hover:text-gray-700">Home</a></li>
                 <li><i class="fas fa-chevron-right text-xs"></i></li>
-                <li><a href="{{ url_for('main.help') }}" class="hover:text-gray-700">Help Center</a></li>
+                <li><a href="{{ url_for('main.help_center') }}" class="hover:text-gray-700">Help Center</a></li>
                 <li><i class="fas fa-chevron-right text-xs"></i></li>
                 <li class="text-gray-900">{{ title }}</li>
             </ol>
+            
+            <div></div> <!-- Spacer for alignment -->
         </div>
     </nav>
 
@@ -70,7 +79,7 @@
                     <i class="fas fa-file-alt text-gray-400 text-6xl mb-4"></i>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Article Not Found</h3>
                     <p class="text-gray-600">This help article is not yet available.</p>
-                    <a href="{{ url_for('main.help') }}" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <a href="{{ url_for('main.help_center') }}" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         Back to Help Center
                     </a>
                 </div>
@@ -139,4 +148,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

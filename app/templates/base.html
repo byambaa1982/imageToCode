@@ -520,6 +520,55 @@
         });
     </script>
     
+    <!-- Global Navigation Utilities -->
+    <script>
+        // Global back navigation function
+        function goBack() {
+            // Check if there's a previous page in browser history
+            if (window.history.length > 1 && document.referrer) {
+                // If user came from within our site, go back
+                if (document.referrer.includes(window.location.hostname)) {
+                    window.history.back();
+                } else {
+                    // If user came from external site or direct link, go to home
+                    window.location.href = "{{ url_for('main.index') }}";
+                }
+            } else {
+                // No history, go to home
+                window.location.href = "{{ url_for('main.index') }}";
+            }
+        }
+        
+        // Handle browser back button properly for single-page-like navigation
+        window.addEventListener('popstate', function(event) {
+            // This ensures proper navigation when using browser back/forward buttons
+            if (event.state) {
+                window.location.reload();
+            }
+        });
+        
+        // Keyboard shortcuts for navigation
+        document.addEventListener('keydown', function(event) {
+            // Alt + Left Arrow = Go back
+            if (event.altKey && event.key === 'ArrowLeft') {
+                event.preventDefault();
+                goBack();
+            }
+            
+            // Alt + H = Go to help center
+            if (event.altKey && event.key === 'h') {
+                event.preventDefault();
+                window.location.href = "{{ url_for('main.help_center') }}";
+            }
+            
+            // Alt + Home = Go to home
+            if (event.altKey && event.key === 'Home') {
+                event.preventDefault();
+                window.location.href = "{{ url_for('main.index') }}";
+            }
+        });
+    </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
