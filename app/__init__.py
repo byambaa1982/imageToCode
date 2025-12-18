@@ -30,6 +30,14 @@ def create_app(config_name='development'):
     mail.init_app(app)
     bcrypt.init_app(app)
     
+    # Initialize database monitoring after db is initialized
+    with app.app_context():
+        from app.database import init_db_monitoring, test_db_connection
+        try:
+            init_db_monitoring()
+        except Exception as e:
+            app.logger.error(f"Failed to initialize database monitoring: {e}")
+    
     # Configure login manager
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
@@ -61,6 +69,10 @@ def create_app(config_name='development'):
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
     
+    # Register health check endpoints
+    from app.health import register_health_blueprint
+    register_health_blueprint(app)
+    
     # Register custom Jinja filters
     register_jinja_filters(app)
     
@@ -86,7 +98,9 @@ def register_jinja_filters(app):
 
 def register_error_handlers(app):
     """Register error handlers."""
-    from flask import render_template
+    from flask import render_template, request, flash, redirect, url_for
+    from sqlalchemy.exc import OperationalError, DisconnectionError
+    from app.database import DatabaseConnectionError, recover_db_connection
     
     @app.errorhandler(404)
     def not_found_error(error):
@@ -94,12 +108,38 @@ def register_error_handlers(app):
     
     @app.errorhandler(500)
     def internal_error(error):
-        db.session.rollback()
+        try:
+            db.session.rollback()
+        except Exception as e:
+            app.logger.error(f"Error during rollback: {e}")
         return render_template('errors/500.html'), 500
     
     @app.errorhandler(429)
     def rate_limit_error(error):
         return render_template('errors/429.html'), 429
+    
+    @app.errorhandler(OperationalError)
+    @app.errorhandler(DisconnectionError)
+    @app.errorhandler(DatabaseConnectionError)
+    def database_error(error):
+        """Handle database connection errors."""
+        error_msg = str(error)
+        app.logger.error(f"Database error: {error_msg}")
+        
+        # Try to recover connection
+        try:
+            recover_db_connection()
+            app.logger.info("Database connection recovered")
+            flash('Connection restored. Please try again.', 'info')
+        except Exception as e:
+            app.logger.error(f"Failed to recover database connection: {e}")
+            flash('We are experiencing technical difficulties. Please try again later.', 'error')
+        
+        # Redirect to home page or show error page
+        if request.endpoint and 'api' in request.endpoint:
+            return {'error': 'Database connection issue, please try again'}, 503
+        else:
+            return render_template('errors/503.html'), 503
 
 
 def register_commands(app):
@@ -169,6 +209,75 @@ def register_commands(app):
         
         db.session.commit()
         print('Packages seeded successfully.')
+    
+    @app.cli.command()
+    def test_db():
+        """Test database connection."""
+        from app.database import test_db_connection, get_db_connection_info
+        
+        print('Testing database connection...')
+        try:
+            if test_db_connection():
+                print('✓ Database connection successful')
+                conn_info = get_db_connection_info()
+                print(f'Connection pool info: {conn_info}')
+            else:
+                print('✗ Database connection failed')
+        except Exception as e:
+            print(f'✗ Database test error: {e}')
+    
+    @app.cli.command()
+    def recover_db():
+        """Recover database connection."""
+        from app.database import recover_db_connection
+        
+        print('Attempting database connection recovery...')
+        try:
+            recover_db_connection()
+            print('✓ Database connection recovered successfully')
+        except Exception as e:
+            print(f'✗ Database recovery failed: {e}')
+    
+    @app.cli.command()
+    def db_status():
+        """Show detailed database status."""
+        from app.database import test_db_connection, get_db_connection_info
+        from sqlalchemy import text
+        
+        print('Database Status Report')
+        print('=' * 50)
+        
+        # Test connection
+        try:
+            connected = test_db_connection()
+            print(f'Connection Status: {"✓ Connected" if connected else "✗ Disconnected"}')
+        except Exception as e:
+            print(f'Connection Status: ✗ Error - {e}')
+            return
+        
+        # Get connection pool info
+        try:
+            conn_info = get_db_connection_info()
+            print(f'Pool Size: {conn_info.get("pool_size", "unknown")}')
+            print(f'Checked Out: {conn_info.get("checked_out", "unknown")}')
+            print(f'Checked In: {conn_info.get("checked_in", "unknown")}')
+            print(f'Overflow: {conn_info.get("overflow", "unknown")}')
+            print(f'Invalid: {conn_info.get("invalid", "unknown")}')
+        except Exception as e:
+            print(f'Pool Info Error: {e}')
+        
+        # Test query performance
+        try:
+            import time
+            start = time.time()
+            with db.engine.connect() as conn:
+                result = conn.execute(text('SELECT COUNT(*) FROM accounts'))
+                count = result.scalar()
+            end = time.time()
+            print(f'Query Performance: {(end - start) * 1000:.2f}ms')
+            print(f'Total Accounts: {count}')
+        except Exception as e:
+            print(f'Query Test Error: {e}')
     
     @app.cli.command()
     def create_admin():

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Features - Screenshot to Code{% endblock %}
+
+{% block content %}
+<!-- Features Hero Section -->
+<section class="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h1 class="text-4xl md:text-6xl font-black mb-6">
+            Powerful Features for
+            <span class="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                Modern Developers
+            </span>
+        </h1>
+        <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+            Everything you need to convert UI screenshots into production-ready code with AI precision
+        </p>
+    </div>
+</section>
+
+<!-- Core Features -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Core Features</h2>
+            <p class="text-xl text-gray-600">Advanced AI-powered conversion with enterprise-grade reliability</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- AI-Powered Conversion -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="w-12 h-12 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fas fa-brain text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">AI-Powered Conversion</h3>
+                <p class="text-gray-600 mb-4">
+                    Advanced GPT-4 Vision and Claude 3.5 Sonnet models analyze your screenshots with 95%+ accuracy
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Smart component detection</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Layout recognition</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Color extraction</li>
+                </ul>
+            </div>
+
+            <!-- Multiple Frameworks -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fab fa-react text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Multiple Frameworks</h3>
+                <p class="text-gray-600 mb-4">
+                    Generate code for your preferred framework with proper structure and best practices
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><i class="fab fa-react text-blue-500 mr-2"></i> React + JSX</li>
+                    <li class="flex items-center"><i class="fab fa-vuejs text-green-500 mr-2"></i> Vue.js</li>
+                    <li class="flex items-center"><i class="fab fa-html5 text-orange-500 mr-2"></i> HTML/CSS/JS</li>
+                </ul>
+            </div>
+
+            <!-- CSS Frameworks -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="w-12 h-12 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fas fa-palette text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">CSS Frameworks</h3>
+                <p class="text-gray-600 mb-4">
+                    Choose your styling approach for consistent, maintainable CSS
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><i class="fas fa-wind text-cyan-500 mr-2"></i> Tailwind CSS</li>
+                    <li class="flex items-center"><i class="fab fa-bootstrap text-purple-500 mr-2"></i> Bootstrap</li>
+                    <li class="flex items-center"><i class="fas fa-code text-gray-500 mr-2"></i> Custom CSS</li>
+                </ul>
+            </div>
+
+            <!-- Real-time Preview -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fas fa-eye text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Live Preview</h3>
+                <p class="text-gray-600 mb-4">
+                    See your generated code rendered in real-time with responsive breakpoints
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Desktop preview</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Mobile responsive</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tablet view</li>
+                </ul>
+            </div>
+
+            <!-- Fast Processing -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fas fa-bolt text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
+                <p class="text-gray-600 mb-4">
+                    Get your code in 30-60 seconds with our optimized AI processing pipeline
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Background processing</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Progress tracking</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Queue management</li>
+                </ul>
+            </div>
+
+            <!-- Clean Code -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fas fa-code text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Clean, Production Code</h3>
+                <p class="text-gray-600 mb-4">
+                    Generated code follows best practices and is ready for production deployment
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Semantic HTML</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Accessible markup</li>
+                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Optimized structure</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Advanced Features -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Advanced Capabilities</h2>
+            <p class="text-xl text-gray-600">Professional tools for serious developers</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Developer Experience</h3>
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-4 mt-1">
+                            <i class="fas fa-download text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">One-Click Download</h4>
+                            <p class="text-gray-600">Download complete project files as ZIP with proper folder structure</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-4 mt-1">
+                            <i class="fas fa-history text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Conversion History</h4>
+                            <p class="text-gray-600">Access all your previous conversions with search and filtering</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mr-4 mt-1">
+                            <i class="fas fa-copy text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Copy to Clipboard</h4>
+                            <p class="text-gray-600">Instantly copy HTML, CSS, or JavaScript with syntax highlighting</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Enterprise Features</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <span class="text-gray-600">High-quality AI models</span>
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <span class="text-gray-600">Responsive design output</span>
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <span class="text-gray-600">Security & privacy focused</span>
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <span class="text-gray-600">99.5% uptime SLA</span>
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between py-3">
+                        <span class="text-gray-600">Email support</span>
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-cyan-500 to-purple-500">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            Ready to Transform Your Development Workflow?
+        </h2>
+        <p class="text-xl mb-8 opacity-90">
+            Join thousands of developers who are already converting screenshots to production code in seconds
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('converter.upload') }}" class="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors duration-300">
+                    Start Converting Now
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.register') }}" class="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors duration-300">
+                    Get Started Free
+                </a>
+            {% endif %}
+            <a href="{{ url_for('main.pricing') }}" class="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-purple-600 transition-colors duration-300">
+                View Pricing
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Help Center - Screenshot to Code{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h1 class="text-4xl md:text-6xl font-black mb-6">
+            Help
+            <span class="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                Center
+            </span>
+        </h1>
+        <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+            Find answers to your questions, guides, and resources to get the most out of Screenshot to Code
+        </p>
+    </div>
+</section>
+
+<!-- Quick Search -->
+<section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 text-lg"></i>
+            </div>
+            <input type="text" 
+                   placeholder="Search for help articles, guides, or FAQs..." 
+                   class="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl shadow-sm text-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+        </div>
+    </div>
+</section>
+
+<!-- Help Categories -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- Getting Started -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300">
+                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-rocket text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Getting Started</h3>
+                <p class="text-gray-600 mb-6">Learn the basics of using Screenshot to Code</p>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ url_for('main.help_article', article='getting-started') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Creating your first account
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='first-conversion') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Your first screenshot conversion
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='credit-system') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Understanding the credit system
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='first-conversion') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Downloading your generated code
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Using the Platform -->
+            <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300">
+                <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-code text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Using the Platform</h3>
+                <p class="text-gray-600 mb-6">Advanced tips and best practices</p>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ url_for('main.help_article', article='choosing-framework') }}" class="text-green-600 hover:text-green-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Choosing the right framework
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='optimizing-screenshots') }}" class="text-green-600 hover:text-green-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Optimizing screenshot quality
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='responsive-designs') }}" class="text-green-600 hover:text-green-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Working with responsive designs
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='conversion-history') }}" class="text-green-600 hover:text-green-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Conversion history management
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Billing & Credits -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-100 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300">
+                <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-credit-card text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Billing & Credits</h3>
+                <p class="text-gray-600 mb-6">Payment, credits, and subscription help</p>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ url_for('main.help_article', article='credit-system') }}" class="text-purple-600 hover:text-purple-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        How the credit system works
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='purchasing-credits') }}" class="text-purple-600 hover:text-purple-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Purchasing credit packages
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='payment-security') }}" class="text-purple-600 hover:text-purple-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Payment methods and security
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='refunds') }}" class="text-purple-600 hover:text-purple-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Refunds and billing issues
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Technical Help -->
+            <div class="bg-gradient-to-br from-orange-50 to-red-100 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300">
+                <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-cog text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Technical Help</h3>
+                <p class="text-gray-600 mb-6">Troubleshooting and technical issues</p>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ url_for('main.help_article', article='upload-problems') }}" class="text-orange-600 hover:text-orange-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Upload problems and solutions
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='conversion-errors') }}" class="text-orange-600 hover:text-orange-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Conversion errors and fixes
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='browser-compatibility') }}" class="text-orange-600 hover:text-orange-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Browser compatibility issues
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='performance') }}" class="text-orange-600 hover:text-orange-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Performance and loading times
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Account Management -->
+            <div class="bg-gradient-to-br from-teal-50 to-cyan-100 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300">
+                <div class="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-user text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Account Management</h3>
+                <p class="text-gray-600 mb-6">Managing your account and settings</p>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ url_for('main.help_article', article='profile-update') }}" class="text-teal-600 hover:text-teal-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Updating profile information
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='password-security') }}" class="text-teal-600 hover:text-teal-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Password and security settings
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='notifications') }}" class="text-teal-600 hover:text-teal-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Email preferences and notifications
+                    </a></li>
+                    <li><a href="{{ url_for('main.help_article', article='account-deletion') }}" class="text-teal-600 hover:text-teal-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Deleting your account
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- API & Integrations -->
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-100 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300">
+                <div class="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-plug text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">API & Integrations</h3>
+                <p class="text-gray-600 mb-6">Developer resources and API documentation</p>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        API documentation (coming soon)
+                    </a></li>
+                    <li><a href="#" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Authentication and API keys
+                    </a></li>
+                    <li><a href="#" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Rate limits and usage quotas
+                    </a></li>
+                    <li><a href="#" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-xs"></i>
+                        Integration examples
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Resources -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Popular Resources</h2>
+            <p class="text-xl text-gray-600">Most accessed guides and documentation</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- User Guide -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-book text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Complete User Guide</h3>
+                        <p class="text-gray-500">Comprehensive guide covering all features</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    Everything you need to know about using Screenshot to Code, from basic usage to advanced tips and best practices.
+                </p>
+                <a href="{{ url_for('main.user_guide') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold">
+                    Read User Guide
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- FAQ -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-question-circle text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Frequently Asked Questions</h3>
+                        <p class="text-gray-500">Quick answers to common questions</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    Find instant answers to the most commonly asked questions about our platform, pricing, and features.
+                </p>
+                <a href="{{ url_for('main.faq') }}" class="inline-flex items-center text-green-600 hover:text-green-800 font-semibold">
+                    View FAQ
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Support -->
+<section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="bg-gradient-to-r from-cyan-500 to-purple-500 p-12 rounded-3xl text-white">
+            <h2 class="text-3xl font-bold mb-6">Still Need Help?</h2>
+            <p class="text-xl mb-8 opacity-90">
+                Can't find what you're looking for? Our support team is here to help you succeed.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Email Support -->
+                <div class="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
+                    <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-envelope text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Email Support</h3>
+                    <p class="text-sm opacity-90 mb-4">Get detailed help via email</p>
+                    <a href="mailto:support@screenshottocode.com" class="inline-flex items-center bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Send Email
+                    </a>
+                </div>
+
+                <!-- Live Chat -->
+                <div class="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
+                    <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-comments text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Community Forum</h3>
+                    <p class="text-sm opacity-90 mb-4">Connect with other users</p>
+                    <a href="#" class="inline-flex items-center bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-users mr-2"></i>
+                        Join Forum
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

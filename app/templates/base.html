@@ -361,21 +361,21 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group">
+                            <a href="{{ url_for('main.features') }}" class="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group">
                                 <i class="fas fa-arrow-right text-xs mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                 Features
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group">
+                            <a href="{{ url_for('main.how_it_works') }}" class="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group">
                                 <i class="fas fa-arrow-right text-xs mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                 How It Works
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group">
+                            <a href="{{ url_for('main.faq') }}" class="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group">
                                 <i class="fas fa-arrow-right text-xs mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                API Docs
+                                FAQ
                             </a>
                         </li>
                     </ul>
@@ -417,9 +417,9 @@
                     &copy; 2024 Screenshot to Code. All rights reserved.
                 </p>
                 <div class="mt-4 md:mt-0 flex space-x-6 text-sm">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
+                    <a href="{{ url_for('main.privacy') }}" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="{{ url_for('main.terms') }}" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="{{ url_for('main.faq') }}" class="text-gray-400 hover:text-white transition-colors">FAQ</a>
                 </div>
             </div>
         </div>

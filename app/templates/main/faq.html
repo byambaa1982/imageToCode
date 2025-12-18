@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ - Screenshot to Code{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h1 class="text-4xl md:text-6xl font-black mb-6">
+            Frequently Asked
+            <span class="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                Questions
+            </span>
+        </h1>
+        <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+            Get instant answers to common questions about our AI-powered screenshot-to-code service
+        </p>
+    </div>
+</section>
+
+<!-- FAQ Content -->
+<section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Getting Started -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <i class="fas fa-rocket text-blue-500 mr-3"></i>
+                Getting Started
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">How do I get started?</h3>
+                    <p class="text-gray-600">
+                        Simply create a free account to get 3 conversion credits. Upload a screenshot, 
+                        choose your framework, and our AI will generate production-ready code in seconds.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">What image formats are supported?</h3>
+                    <p class="text-gray-600">
+                        We support PNG, JPG, JPEG, and WebP formats. Maximum file size is 10MB. 
+                        For best results, use high-resolution screenshots (1920x1080 or higher).
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">How accurate is the AI conversion?</h3>
+                    <p class="text-gray-600">
+                        Our AI achieves 95%+ accuracy with clear, well-structured screenshots. 
+                        Results depend on image quality, complexity, and clarity of the UI elements.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frameworks & Code -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <i class="fas fa-code text-green-500 mr-3"></i>
+                Frameworks & Code Output
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">What frameworks are supported?</h3>
+                    <p class="text-gray-600 mb-3">We currently support:</p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li><strong>React</strong> - JSX components with modern hooks</li>
+                        <li><strong>Vue.js</strong> - Single-file components with composition API</li>
+                        <li><strong>HTML/CSS/JS</strong> - Vanilla web technologies</li>
+                        <li><strong>Tailwind CSS</strong> - Utility-first styling</li>
+                        <li><strong>Bootstrap</strong> - Component-based framework</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Is the generated code production-ready?</h3>
+                    <p class="text-gray-600">
+                        Yes! Our AI generates clean, semantic code that follows best practices including 
+                        proper HTML structure, accessibility features, and responsive design principles.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Can I customize the generated code?</h3>
+                    <p class="text-gray-600">
+                        Absolutely! The generated code is yours to modify, enhance, and adapt to your 
+                        specific needs. It serves as a solid foundation that you can build upon.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits & Billing -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <i class="fas fa-credit-card text-purple-500 mr-3"></i>
+                Credits & Billing
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">How does the credit system work?</h3>
+                    <p class="text-gray-600">
+                        1 credit = 1 conversion. Credits never expire and accumulate when you purchase 
+                        multiple packages. New accounts start with 3 free credits.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">What are your pricing options?</h3>
+                    <p class="text-gray-600 mb-3">We offer flexible one-time purchase packages:</p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li><strong>Starter Pack</strong> - $1.99 for 2 credits</li>
+                        <li><strong>Pro Pack</strong> - $2.49 for 3 credits (Most Popular)</li>
+                        <li><strong>Bulk Pack</strong> - $7.99 for 10 credits (Best Value)</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Do you offer refunds?</h3>
+                    <p class="text-gray-600">
+                        Credits are generally non-refundable, but we may consider refunds for technical 
+                        failures or service issues. Contact our support team for assistance.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Is payment secure?</h3>
+                    <p class="text-gray-600">
+                        Yes, all payments are processed securely through Stripe with industry-standard 
+                        encryption. We don't store your payment information on our servers.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Questions -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <i class="fas fa-cogs text-orange-500 mr-3"></i>
+                Technical Questions
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">How long does conversion take?</h3>
+                    <p class="text-gray-600">
+                        Most conversions complete in 30-60 seconds. Processing time may vary based on 
+                        image complexity and current system load.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">What happens to my uploaded images?</h3>
+                    <p class="text-gray-600">
+                        Images are automatically deleted after processing is complete (usually within 24 hours). 
+                        We don't store your images permanently for privacy and security.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Can I batch process multiple screenshots?</h3>
+                    <p class="text-gray-600">
+                        Currently, we process one screenshot at a time. Batch processing is on our roadmap 
+                        for future releases. You can convert multiple images sequentially.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Do you have an API?</h3>
+                    <p class="text-gray-600">
+                        API access is coming soon! We're working on developer APIs for bulk conversions 
+                        and integration with design tools. Join our newsletter for updates.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support & Troubleshooting -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <i class="fas fa-life-ring text-red-500 mr-3"></i>
+                Support & Troubleshooting
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">What if the conversion fails?</h3>
+                    <p class="text-gray-600">
+                        If a conversion fails due to technical issues, your credit won't be deducted. 
+                        Try uploading a clearer image or contact support if the problem persists.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">How do I get better results?</h3>
+                    <p class="text-gray-600 mb-3">For optimal results:</p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li>Use high-resolution, clear screenshots</li>
+                        <li>Ensure good contrast and lighting</li>
+                        <li>Crop out unnecessary browser elements</li>
+                        <li>Include complete UI sections</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">How do I contact support?</h3>
+                    <p class="text-gray-600">
+                        Email us at <strong>support@screenshottocode.com</strong>. We typically respond 
+                        within 24 hours. Include your account email and describe the issue for faster assistance.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Can I access my conversion history?</h3>
+                    <p class="text-gray-600">
+                        Yes! All your conversions are saved in your account dashboard. You can 
+                        re-download previous results, search by date, and manage your conversion history.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Still Have Questions -->
+        <div class="bg-gradient-to-r from-cyan-500 to-purple-500 p-8 rounded-2xl text-white text-center">
+            <h2 class="text-2xl font-bold mb-4">Still Have Questions?</h2>
+            <p class="text-lg mb-6 opacity-90">
+                Can't find what you're looking for? Our support team is here to help!
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="mailto:support@screenshottocode.com" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300">
+                    <i class="fas fa-envelope mr-2"></i>
+                    Email Support
+                </a>
+                <a href="{{ url_for('main.index') }}" class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors duration-300">
+                    <i class="fas fa-home mr-2"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

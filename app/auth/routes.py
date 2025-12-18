@@ -15,8 +15,14 @@ from app.extensions import db, login_manager
 
 @login_manager.user_loader
 def load_user(user_id):
-    """Load user by ID."""
-    return Account.query.get(int(user_id))
+    """Load user by ID with connection error handling."""
+    try:
+        from app.database import safe_get_user_by_id
+        return safe_get_user_by_id(int(user_id))
+    except Exception as e:
+        # Log the error but don't raise to avoid breaking user sessions
+        current_app.logger.error(f"Error loading user {user_id}: {e}")
+        return None
 
 
 @auth.route('/login', methods=['GET', 'POST'])

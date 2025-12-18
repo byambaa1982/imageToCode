@@ -41,8 +41,28 @@ class Config:
     SQLALCHEMY_DATABASE_URI = None  # Will be set dynamically
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
-    SQLALCHEMY_POOL_PRE_PING = True
-    SQLALCHEMY_POOL_RECYCLE = 280
+    
+    # Connection pooling and recovery settings
+    SQLALCHEMY_POOL_PRE_PING = True  # Test connections before use
+    SQLALCHEMY_POOL_RECYCLE = 280    # Recycle connections every 280 seconds (< 300s MySQL timeout)
+    SQLALCHEMY_POOL_SIZE = 10        # Connection pool size
+    SQLALCHEMY_MAX_OVERFLOW = 20     # Max overflow connections
+    SQLALCHEMY_POOL_TIMEOUT = 30     # Timeout for getting connection from pool
+    
+    # Engine options for better connection handling
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+        'pool_size': 10,
+        'max_overflow': 20,
+        'pool_timeout': 30,
+        'connect_args': {
+            'connect_timeout': 60,
+            'read_timeout': 60,
+            'write_timeout': 60,
+            'charset': 'utf8mb4'
+        }
+    }
     
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)

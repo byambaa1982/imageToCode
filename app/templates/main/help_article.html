@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Help Center{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Breadcrumb Navigation -->
+    <nav class="bg-white border-b border-gray-200 px-4 py-3">
+        <div class="max-w-4xl mx-auto">
+            <ol class="flex items-center space-x-2 text-sm text-gray-500">
+                <li><a href="{{ url_for('main.index') }}" class="hover:text-gray-700">Home</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li><a href="{{ url_for('main.help') }}" class="hover:text-gray-700">Help Center</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li class="text-gray-900">{{ title }}</li>
+            </ol>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Article Header -->
+        <div class="bg-white rounded-lg shadow-sm p-8 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ title }}</h1>
+            <div class="flex items-center text-sm text-gray-500 space-x-4">
+                <span><i class="fas fa-clock mr-1"></i> Last updated: January 15, 2024</span>
+                <span><i class="fas fa-eye mr-1"></i> 5 min read</span>
+            </div>
+        </div>
+
+        <!-- Article Content -->
+        <div class="bg-white rounded-lg shadow-sm p-8">
+            {% if article == 'getting-started' %}
+                {% include 'main/help_articles/getting_started.html' %}
+            {% elif article == 'first-conversion' %}
+                {% include 'main/help_articles/first_conversion.html' %}
+            {% elif article == 'credit-system' %}
+                {% include 'main/help_articles/credit_system.html' %}
+            {% elif article == 'choosing-framework' %}
+                {% include 'main/help_articles/choosing_framework.html' %}
+            {% elif article == 'optimizing-screenshots' %}
+                {% include 'main/help_articles/optimizing_screenshots.html' %}
+            {% elif article == 'responsive-designs' %}
+                {% include 'main/help_articles/responsive_designs.html' %}
+            {% elif article == 'conversion-history' %}
+                {% include 'main/help_articles/conversion_history.html' %}
+            {% elif article == 'purchasing-credits' %}
+                {% include 'main/help_articles/purchasing_credits.html' %}
+            {% elif article == 'payment-security' %}
+                {% include 'main/help_articles/payment_security.html' %}
+            {% elif article == 'refunds' %}
+                {% include 'main/help_articles/refunds.html' %}
+            {% elif article == 'upload-problems' %}
+                {% include 'main/help_articles/upload_problems.html' %}
+            {% elif article == 'conversion-errors' %}
+                {% include 'main/help_articles/conversion_errors.html' %}
+            {% elif article == 'browser-compatibility' %}
+                {% include 'main/help_articles/browser_compatibility.html' %}
+            {% elif article == 'performance' %}
+                {% include 'main/help_articles/performance.html' %}
+            {% elif article == 'profile-update' %}
+                {% include 'main/help_articles/profile_update.html' %}
+            {% elif article == 'password-security' %}
+                {% include 'main/help_articles/password_security.html' %}
+            {% elif article == 'notifications' %}
+                {% include 'main/help_articles/notifications.html' %}
+            {% elif article == 'account-deletion' %}
+                {% include 'main/help_articles/account_deletion.html' %}
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-file-alt text-gray-400 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Article Not Found</h3>
+                    <p class="text-gray-600">This help article is not yet available.</p>
+                    <a href="{{ url_for('main.help') }}" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Back to Help Center
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Article Footer -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mt-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Was this helpful?</h3>
+                    <div class="flex space-x-2">
+                        <button class="flex items-center space-x-1 text-green-600 hover:text-green-700">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>Yes</span>
+                        </button>
+                        <button class="flex items-center space-x-1 text-red-600 hover:text-red-700">
+                            <i class="fas fa-thumbs-down"></i>
+                            <span>No</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <p class="text-sm text-gray-600 mb-2">Still need help?</p>
+                    <a href="mailto:support@screenshottocode.com" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Articles -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Related Articles</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% if article == 'getting-started' %}
+                    <a href="{{ url_for('main.help_article', article='first-conversion') }}" class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                        <h4 class="font-medium text-gray-900">Your First Conversion</h4>
+                        <p class="text-sm text-gray-600 mt-1">Step-by-step guide to converting screenshots</p>
+                    </a>
+                    <a href="{{ url_for('main.help_article', article='credit-system') }}" class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                        <h4 class="font-medium text-gray-900">Understanding Credits</h4>
+                        <p class="text-sm text-gray-600 mt-1">How our credit system works</p>
+                    </a>
+                {% elif article == 'first-conversion' %}
+                    <a href="{{ url_for('main.help_article', article='choosing-framework') }}" class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                        <h4 class="font-medium text-gray-900">Choosing Framework</h4>
+                        <p class="text-sm text-gray-600 mt-1">Select the right output framework</p>
+                    </a>
+                    <a href="{{ url_for('main.help_article', article='optimizing-screenshots') }}" class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                        <h4 class="font-medium text-gray-900">Optimizing Screenshots</h4>
+                        <p class="text-sm text-gray-600 mt-1">Best practices for quality conversions</p>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('main.help_article', article='getting-started') }}" class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                        <h4 class="font-medium text-gray-900">Getting Started</h4>
+                        <p class="text-sm text-gray-600 mt-1">New to Screenshot to Code?</p>
+                    </a>
+                    <a href="{{ url_for('main.faq') }}" class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                        <h4 class="font-medium text-gray-900">FAQ</h4>
+                        <p class="text-sm text-gray-600 mt-1">Frequently asked questions</p>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
