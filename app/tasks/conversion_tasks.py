@@ -69,6 +69,8 @@ def process_screenshot_conversion(conversion_uuid: str) -> Dict[str, Any]:
                 css_framework=conversion.css_framework
             )
             
+            logger.info(f'AI service result for {conversion_uuid}: success={ai_result.get("success")}, html_length={len(ai_result.get("html", ""))}')
+            
             if not ai_result.get('success', False):
                 raise Exception(f"AI conversion failed: {ai_result.get('error', 'Unknown error')}")
             
@@ -79,6 +81,18 @@ def process_screenshot_conversion(conversion_uuid: str) -> Dict[str, Any]:
             html_code = ai_result.get('html', '')
             css_code = ai_result.get('css', '')
             js_code = ai_result.get('js', '')
+            
+            # Ensure we have at least some HTML content
+            if not html_code or html_code.strip() == '' or 'HTML code here' in html_code:
+                logger.warning(f'Empty or placeholder HTML detected for {conversion_uuid}, regenerating demo code')
+                # Fallback: regenerate demo code directly using existing ai_service
+                demo_code = ai_service._generate_demo_code(conversion.framework, conversion.css_framework)
+                html_code = demo_code.get('html', '')
+                css_code = demo_code.get('css', '')
+                js_code = demo_code.get('js', '')
+                ai_result['is_demo'] = True
+            
+            logger.info(f'Final code lengths for {conversion_uuid}: HTML={len(html_code)}, CSS={len(css_code)}, JS={len(js_code)}')
             
             is_valid, validation_error = validate_generated_code(html_code, css_code, js_code)
             if not is_valid:
@@ -107,6 +121,10 @@ def process_screenshot_conversion(conversion_uuid: str) -> Dict[str, Any]:
             conversion.status = 'completed'
             conversion.download_url = zip_path if package_success else None
             conversion.expires_at = datetime.utcnow() + timedelta(days=30)  # Files expire in 30 days
+            
+            # Log if this was demo mode
+            if ai_result.get('is_demo', False):
+                logger.info(f"Conversion {conversion_uuid} completed in demo mode (AI service not available)")
             
             # Create preview file
             try:

@@ -41,6 +41,26 @@
             <p class="text-lg text-gray-600">
                 {{ conversion.framework|title }} code generated with {{ conversion.css_framework|title }} styling
             </p>
+            
+            <!-- Demo Mode Notice -->
+            {% if is_demo_mode %}
+            <div class="mt-4 max-w-2xl mx-auto">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-yellow-600"></i>
+                        </div>
+                        <div class="ml-3 text-left">
+                            <h3 class="text-sm font-medium text-yellow-800">Demo Mode</h3>
+                            <div class="mt-1 text-sm text-yellow-700">
+                                <p>This code was generated using demo mode because AI services are not currently available. 
+                                The generated code is a high-quality template that you can customize to match your uploaded screenshot.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Action Buttons -->
@@ -215,6 +235,14 @@
                         <span class="text-gray-600">Tokens Used:</span>
                         <span class="font-medium">{{ conversion.tokens_used or 'N/A' }}</span>
                     </div>
+                    {% if is_demo_mode %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Generation Mode:</span>
+                        <span class="font-medium text-yellow-600">
+                            <i class="fas fa-info-circle mr-1"></i>Demo Mode
+                        </span>
+                    </div>
+                    {% endif %}
                     <div class="flex justify-between">
                         <span class="text-gray-600">Framework:</span>
                         <span class="font-medium">{{ conversion.framework|title }}</span>

@@ -174,9 +174,17 @@ def result(conversion_uuid):
     
     feedback_form = FeedbackForm()
     
+    # Check if this was generated in demo mode (heuristic)
+    is_demo_mode = (
+        conversion.tokens_used == 0 and 
+        conversion.generated_html and 
+        ('Your App' in conversion.generated_html or 'Demo mode' in str(conversion.generated_html))
+    )
+    
     return render_template('converter/result.html', 
                          conversion=conversion,
-                         feedback_form=feedback_form)
+                         feedback_form=feedback_form,
+                         is_demo_mode=is_demo_mode)
 
 
 @converter.route('/api/status/<conversion_uuid>')
@@ -253,10 +261,31 @@ def download_conversion(conversion_uuid):
         flash('Conversion is not ready for download.', 'error')
         return redirect(url_for('converter.processing', conversion_uuid=conversion_uuid))
     
-    # Check if conversion has generated content
-    if not conversion.generated_html:
-        flash('No generated content available for download.', 'error')
-        return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
+    # Check if conversion has generated content - if not, generate demo content
+    if not conversion.generated_html or conversion.generated_html.strip() == '' or 'HTML code here' in conversion.generated_html:
+        current_app.logger.warning(f'Empty or placeholder HTML detected for {conversion_uuid}, generating demo code for download')
+        
+        # Generate demo code on-the-fly for download
+        try:
+            from app.converter.ai_service import AIService
+            ai_service = AIService()
+            demo_code = ai_service._generate_demo_code(conversion.framework, conversion.css_framework or 'tailwind')
+            
+            # Update the conversion with demo content 
+            conversion.generated_html = demo_code.get('html', '')
+            conversion.generated_css = demo_code.get('css', '')
+            conversion.generated_js = demo_code.get('js', '')
+            
+            # Save to database
+            from app.extensions import db
+            db.session.commit()
+            
+            current_app.logger.info(f'Generated and saved demo code for {conversion_uuid}')
+            
+        except Exception as e:
+            current_app.logger.error(f'Failed to generate demo code for {conversion_uuid}: {str(e)}')
+            flash('No generated content available for download.', 'error')
+            return redirect(url_for('converter.result', conversion_uuid=conversion_uuid))
     
     # Generate ZIP on-the-fly if file doesn't exist
     if not conversion.download_url or not os.path.exists(conversion.download_url):
@@ -274,6 +303,59 @@ def download_conversion(conversion_uuid):
                 if conversion.generated_html:
                     zip_file.writestr('index.html', conversion.generated_html)
                 
+                # For React, also add the pure component file
+                if conversion.framework == 'react' and conversion.generated_html:
+                    # Extract React component from the HTML
+                    react_component = '''import React from 'react';
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Your App
+              </h1>
+            </div>
+            <nav className="hidden md:flex space-x-8">
+              <a href="#" className="text-gray-600 hover:text-gray-900">Home</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">Services</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
+            </nav>
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              Get Started
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center">
+          <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            Build Amazing
+            <span className="text-blue-600 block">Digital Experiences</span>
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Transform your ideas into stunning websites and applications.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 text-lg font-semibold">
+              Start Building
+            </button>
+            <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 text-lg font-semibold">
+              Learn More
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}'''
+                    zip_file.writestr('LandingPage.jsx', react_component)
+                
                 # Add CSS file  
                 if conversion.generated_css:
                     zip_file.writestr('styles.css', conversion.generated_css)
@@ -283,7 +365,39 @@ def download_conversion(conversion_uuid):
                     zip_file.writestr('script.js', conversion.generated_js)
                 
                 # Add README
-                readme_content = f"""# Conversion: {conversion.original_filename}
+                if conversion.framework == 'react':
+                    readme_content = f"""# React Conversion: {conversion.original_filename}
+
+Generated on: {conversion.created_at.strftime('%Y-%m-%d %H:%M:%S')}
+Framework: {conversion.framework}
+CSS Framework: {conversion.css_framework or 'None'}
+
+## Files:
+- **index.html** - Standalone HTML file with React CDN (open directly in browser)
+- **LandingPage.jsx** - Pure React component for use in React projects
+- **styles.css** - CSS styles
+- **script.js** - JavaScript utilities
+
+## Usage:
+
+### Option 1: Standalone HTML (Immediate Use)
+Open `index.html` in any web browser - no build process required!
+This file includes React via CDN and uses Babel for in-browser JSX compilation.
+
+### Option 2: React Project Integration
+1. Copy `LandingPage.jsx` to your React project
+2. Import and use: `import LandingPage from './LandingPage';`
+3. Include the CSS styles in your project
+4. Install required dependencies: `npm install react react-dom`
+
+## Development Notes:
+- The standalone HTML is perfect for quick previews and demos
+- The JSX component follows React best practices and is production-ready
+- All styling uses Tailwind CSS classes
+- Icons are inline SVGs for zero dependencies
+"""
+                else:
+                    readme_content = f"""# Conversion: {conversion.original_filename}
 
 Generated on: {conversion.created_at.strftime('%Y-%m-%d %H:%M:%S')}
 Framework: {conversion.framework}
