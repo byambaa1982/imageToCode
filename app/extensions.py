@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 from flask_bcrypt import Bcrypt
+from flask_moment import Moment
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -15,3 +16,4 @@ migrate = Migrate()
 csrf = CSRFProtect()
 mail = Mail()
 bcrypt = Bcrypt()
+moment = Moment()

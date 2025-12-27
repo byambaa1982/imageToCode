@@ -3,7 +3,7 @@
 
 import logging
 from flask import Flask
-from app.extensions import db, login_manager, migrate, csrf, mail, bcrypt
+from app.extensions import db, login_manager, migrate, csrf, mail, bcrypt, moment
 from config import config
 
 
@@ -40,6 +40,7 @@ def create_app(config_name='development'):
     csrf.init_app(app)
     mail.init_app(app)
     bcrypt.init_app(app)
+    moment.init_app(app)
     
     # Initialize database monitoring after db is initialized (only in production)
     if not app.debug and config_name == 'production':
