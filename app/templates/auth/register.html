@@ -12,6 +12,31 @@
             <p class="mt-2 text-center text-sm text-gray-600">
                 Get 3 free conversions to start
             </p>
+            
+            <!-- Promo Code Banner -->
+            {% if promo_info %}
+            <div class="mt-4 bg-green-100 border border-green-300 rounded-lg p-4">
+                <div class="text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <i class="fas fa-gift text-green-600 text-xl mr-2"></i>
+                        <span class="font-bold text-green-800">Special Offer Active!</span>
+                    </div>
+                    <p class="text-green-700">
+                        You'll get <strong>{{ promo_info.credits }} bonus credits</strong> 
+                        from promo code <code class="bg-green-200 px-2 py-1 rounded font-mono">{{ promo_info.code }}</code>
+                    </p>
+                    <p class="text-sm text-green-600 mt-1">
+                        {% if promo_info.campaign == 'product_hunt' %}
+                            Product Hunt Launch Special
+                        {% elif promo_info.campaign == 'reddit' %}
+                            Reddit Exclusive Offer
+                        {% else %}
+                            {{ promo_info.campaign|title }} Campaign
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
         </div>
         
         <form class="mt-8 space-y-6" method="POST" action="{{ url_for('auth.register') }}">

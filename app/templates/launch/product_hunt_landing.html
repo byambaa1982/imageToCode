@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}🚀 We're Live on Product Hunt! - Screenshot to Code{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+    
+    <!-- Product Hunt Banner -->
+    <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="font-semibold">🎉 We're LIVE on Product Hunt! Help us reach #1 by voting now!</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-12">
+            <!-- Product Hunt Badge -->
+            <div class="mb-8">
+                <a href="https://www.producthunt.com" target="_blank" class="inline-block">
+                    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=YOUR_POST_ID&theme=light" 
+                         alt="Screenshot to Code - AI-powered tool that converts UI screenshots into clean, production-ready code | Product Hunt" 
+                         style="width: 250px; height: 54px;" width="250" height="54" />
+                </a>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-black mb-6">
+                <span class="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                    Screenshot to Code
+                </span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
+                Turn any UI screenshot into clean, production-ready code in seconds. 
+                <strong>React, Vue, HTML</strong> - powered by AI.
+            </p>
+
+            <!-- Special Offer Alert -->
+            <div class="bg-orange-100 border border-orange-300 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-gift text-orange-600 text-3xl mr-4"></i>
+                    <div>
+                        <h3 class="text-xl font-bold text-orange-800">Product Hunt Special!</h3>
+                        <p class="text-orange-700">First 100 visitors get <strong>10 FREE conversions</strong></p>
+                    </div>
+                </div>
+                <p class="text-sm text-orange-600 font-medium">
+                    Promo code <code class="bg-orange-200 px-2 py-1 rounded font-mono">PRODUCTHUNT10</code> automatically applied!
+                </p>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('launch.redeem_credits') }}" 
+                   class="bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-orange-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 text-lg">
+                    <i class="fas fa-magic mr-2"></i>Claim Free Credits & Start Converting
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" 
+                   class="bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-orange-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 text-lg">
+                    <i class="fas fa-rocket mr-2"></i>Get Started - It's Free!
+                </a>
+                {% endif %}
+                
+                <a href="https://www.producthunt.com" target="_blank"
+                   class="border-2 border-orange-600 text-orange-600 font-bold py-4 px-8 rounded-xl hover:bg-orange-600 hover:text-white transition-all duration-200 text-lg">
+                    <i class="fas fa-arrow-up mr-2"></i>Vote on Product Hunt
+                </a>
+            </div>
+        </div>
+
+        <!-- Demo Video/Screenshot -->
+        <div class="text-center mb-16">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">See it in Action</h3>
+                
+                <!-- Demo Steps -->
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-upload text-orange-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">1. Upload Screenshot</h4>
+                        <p class="text-gray-600">Drop any UI screenshot or design mockup</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-brain text-red-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">2. AI Processes</h4>
+                        <p class="text-gray-600">Our AI analyzes and generates clean code</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-code text-green-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">3. Get Production Code</h4>
+                        <p class="text-gray-600">Download React, Vue, or HTML/CSS code</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-zap text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Lightning Fast</h3>
+                <p class="text-gray-600">Get production-ready code in under 30 seconds</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-mobile-alt text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Responsive Design</h3>
+                <p class="text-gray-600">All generated code is mobile-first and responsive</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-download text-green-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Ready to Use</h3>
+                <p class="text-gray-600">Clean, commented code ready for production</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fab fa-react text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Multiple Frameworks</h3>
+                <p class="text-gray-600">React, Vue, HTML/CSS - choose your preference</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-palette text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Tailwind CSS</h3>
+                <p class="text-gray-600">Modern utility-first CSS framework included</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Secure & Private</h3>
+                <p class="text-gray-600">Your images and code are never stored permanently</p>
+            </div>
+        </div>
+
+        <!-- Social Proof -->
+        <div class="text-center mb-16">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Join the Launch Day Excitement!</h3>
+                <div class="flex flex-wrap justify-center items-center gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-orange-600" id="live-visitors">127</div>
+                        <div class="text-sm text-gray-500">Visitors Today</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600" id="live-signups">43</div>
+                        <div class="text-sm text-gray-500">New Users</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-600" id="live-conversions">29</div>
+                        <div class="text-sm text-gray-500">Conversions</div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <p class="text-lg text-gray-700">
+                        <strong>Don't miss out!</strong> The first 100 Product Hunt visitors get 
+                        <span class="text-orange-600 font-bold">10 free conversions</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final CTA -->
+        <div class="text-center">
+            <div class="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-8 border-2 border-orange-200">
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">Ready to Transform Your Workflow?</h3>
+                <p class="text-xl text-gray-700 mb-6">
+                    Join hundreds of developers who are already converting screenshots to code in seconds.
+                </p>
+                
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('launch.redeem_credits') }}" 
+                   class="inline-block bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-orange-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 text-xl">
+                    <i class="fas fa-gift mr-2"></i>Claim Your Free Credits Now!
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" 
+                   class="inline-block bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-orange-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 text-xl">
+                    <i class="fas fa-rocket mr-2"></i>Start Converting for Free!
+                </a>
+                {% endif %}
+                
+                <p class="text-sm text-gray-600 mt-4">
+                    No credit card required • 10 free conversions • Product Hunt exclusive
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Track Product Hunt visit
+fetch('/launch/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        event_type: 'product_hunt_visit',
+        event_data: { referrer: document.referrer }
+    })
+});
+
+// Simulate live metrics (replace with real API call)
+function updateLiveMetrics() {
+    const visitors = document.getElementById('live-visitors');
+    const signups = document.getElementById('live-signups');
+    const conversions = document.getElementById('live-conversions');
+    
+    // Add small random increments to create "live" feeling
+    if (Math.random() > 0.7) {
+        visitors.textContent = parseInt(visitors.textContent) + Math.floor(Math.random() * 3) + 1;
+    }
+    if (Math.random() > 0.8) {
+        signups.textContent = parseInt(signups.textContent) + 1;
+    }
+    if (Math.random() > 0.9) {
+        conversions.textContent = parseInt(conversions.textContent) + 1;
+    }
+}
+
+// Update metrics every 30 seconds
+setInterval(updateLiveMetrics, 30000);
+</script>
+{% endblock %}

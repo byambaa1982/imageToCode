@@ -42,24 +42,24 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     
-    # Connection pooling and recovery settings
+    # Connection pooling and recovery settings (optimized for performance)
     SQLALCHEMY_POOL_PRE_PING = True  # Test connections before use
     SQLALCHEMY_POOL_RECYCLE = 280    # Recycle connections every 280 seconds (< 300s MySQL timeout)
-    SQLALCHEMY_POOL_SIZE = 10        # Connection pool size
-    SQLALCHEMY_MAX_OVERFLOW = 20     # Max overflow connections
-    SQLALCHEMY_POOL_TIMEOUT = 30     # Timeout for getting connection from pool
+    SQLALCHEMY_POOL_SIZE = 15        # Increased connection pool size
+    SQLALCHEMY_MAX_OVERFLOW = 25     # Increased max overflow connections
+    SQLALCHEMY_POOL_TIMEOUT = 20     # Reduced timeout for getting connection from pool
     
-    # Engine options for better connection handling
+    # Engine options for better connection handling (optimized)
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 280,
-        'pool_size': 10,
-        'max_overflow': 20,
-        'pool_timeout': 30,
+        'pool_size': 15,
+        'max_overflow': 25,
+        'pool_timeout': 20,
         'connect_args': {
-            'connect_timeout': 60,
-            'read_timeout': 60,
-            'write_timeout': 60,
+            'connect_timeout': 30,  # Reduced from 60
+            'read_timeout': 30,     # Reduced from 60  
+            'write_timeout': 30,    # Reduced from 60
             'charset': 'utf8mb4'
         }
     }
@@ -254,27 +254,36 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    """Development configuration."""
+    """Development configuration with performance optimizations."""
     
     DEBUG = True
     TESTING = False
-    SQLALCHEMY_ECHO = False  # Disabled to reduce log verbosity
-    SESSION_COOKIE_SECURE = False
-    SQLALCHEMY_POOL_SIZE = 10
-    SQLALCHEMY_MAX_OVERFLOW = 20
-    SQLALCHEMY_POOL_TIMEOUT = 30
     
-    @classmethod
-    def init_app(cls, app):
-        # Set database URI before calling parent init_app
-        if app.config.get('SQLALCHEMY_DATABASE_URI') is None:
-            app.config['SQLALCHEMY_DATABASE_URI'] = cls.get_mysql_uri()
-        
-        Config.init_app(app)
-        
-        # Create upload folder if it doesn't exist
-        import os
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    # Disable heavy features in development for better performance
+    ENABLE_LAUNCH_TRACKING = False  # Disable launch tracking middleware
+    SQLALCHEMY_ECHO = False  # Keep SQL logging off for performance
+    
+    # Faster session timeout for development
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
+    
+    # Reduced connection pool for development
+    SQLALCHEMY_POOL_SIZE = 5
+    SQLALCHEMY_MAX_OVERFLOW = 10
+    
+    # Development-specific optimizations
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+        'pool_size': 5,
+        'max_overflow': 10,
+        'pool_timeout': 20,
+        'connect_args': {
+            'connect_timeout': 30,
+            'read_timeout': 30,
+            'write_timeout': 30,
+            'charset': 'utf8mb4'
+        }
+    }
 
 
 class TestingConfig(Config):
@@ -291,35 +300,17 @@ class ProductionConfig(Config):
     
     DEBUG = False
     TESTING = False
-    # Optimized for PythonAnywhere
-    SQLALCHEMY_POOL_SIZE = 5
-    SQLALCHEMY_MAX_OVERFLOW = 10
-    SQLALCHEMY_POOL_RECYCLE = 280
-    SQLALCHEMY_POOL_TIMEOUT = 20
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 280,
-        'connect_args': {
-            'connect_timeout': 10,
-            'read_timeout': 30,
-            'write_timeout': 30,
-        }
-    }
     
-    @classmethod
-    def init_app(cls, app):
-        # Set database URI before calling parent init_app
-        if app.config.get('SQLALCHEMY_DATABASE_URI') is None:
-            app.config['SQLALCHEMY_DATABASE_URI'] = cls.get_mysql_uri()
-        
-        Config.init_app(app)
-        
-        # Log to stderr
-        import logging
-        from logging import StreamHandler
-        file_handler = StreamHandler()
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
+    # Enable launch tracking in production
+    ENABLE_LAUNCH_TRACKING = True
+    
+    # Security settings
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Strict'
+    
+    # Performance optimizations for production
+    SEND_FILE_MAX_AGE_DEFAULT = timedelta(hours=12)
 
 
 config = {

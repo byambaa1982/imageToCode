@@ -86,33 +86,108 @@ def register():
     form = RegistrationForm()
     
     if form.validate_on_submit():
-        # Create new user
-        user = Account(
-            username=form.username.data,
-            email=form.email.data.lower(),
-            credits_remaining=current_app.config['FREE_CREDITS_ON_SIGNUP']
-        )
-        user.set_password(form.password.data)
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        # Send verification email
-        if send_verification_email(user):
-            flash('Account created successfully! Please check your email to verify your account.', 'success')
-        else:
-            flash('Account created successfully! However, we could not send a verification email. Please contact support.', 'warning')
-        
-        # Send welcome email
         try:
-            from app.tasks.email_tasks import send_welcome_email
-            send_welcome_email.delay(user.id)
-        except Exception:
-            pass  # Don't let email failures affect registration
-        
-        return redirect(url_for('auth.login'))
+            # Create new user
+            user = Account(
+                username=form.username.data,
+                email=form.email.data.lower(),
+                credits_remaining=current_app.config.get('FREE_CREDITS_ON_SIGNUP', 3.0)
+            )
+            user.set_password(form.password.data)
+            
+            db.session.add(user)
+            db.session.flush()  # Get user ID
+            
+            # Handle promo code if present
+            promo_code_str = session.get('promo_code')
+            if promo_code_str:
+                from app.models import PromoCode, PromoCodeRedemption
+                from app.launch.utils import track_launch_event
+                
+                promo_code = PromoCode.query.filter_by(code=promo_code_str, is_active=True).first()
+                
+                if promo_code and promo_code.discount_type == 'credits':
+                    # Check validity
+                    is_valid, error_msg = promo_code.is_valid(user.id)
+                    
+                    if is_valid:
+                        # Add bonus credits
+                        user.add_credits(promo_code.discount_value, f'Promo code: {promo_code.code}')
+                        
+                        # Record redemption
+                        redemption = PromoCodeRedemption(
+                            promo_code_id=promo_code.id,
+                            account_id=user.id,
+                            original_amount=0,
+                            discount_amount=promo_code.discount_value,
+                            final_amount=0,
+                            context='signup',
+                            ip_address=request.remote_addr,
+                            user_agent=request.headers.get('User-Agent')
+                        )
+                        db.session.add(redemption)
+                        
+                        # Update promo code usage
+                        promo_code.uses_count += 1
+                        
+                        # Track the signup with promo
+                        track_launch_event('signup', {
+                            'promo_code': promo_code.code,
+                            'campaign': promo_code.campaign,
+                            'bonus_credits': float(promo_code.discount_value)
+                        })
+                        
+                        flash(f'🎉 Welcome! You received {promo_code.discount_value} bonus credits from promo code {promo_code.code}!', 'success')
+                    else:
+                        # Track signup without promo (expired/invalid)
+                        track_launch_event('signup', {'promo_code_error': error_msg})
+                        
+            else:
+                # Track regular signup
+                from app.launch.utils import track_launch_event
+                track_launch_event('signup', {})
+            
+            db.session.commit()
+            
+            # Clear promo code from session
+            session.pop('promo_code', None)
+            session.pop('promo_campaign', None)
+            
+            # Send verification email
+            if send_verification_email(user):
+                if not promo_code_str:
+                    flash('Account created successfully! Please check your email to verify your account.', 'success')
+            else:
+                flash('Account created successfully! However, we could not send a verification email. Please contact support.', 'warning')
+            
+            # Send welcome email
+            try:
+                from app.tasks.email_tasks import send_welcome_email
+                send_welcome_email.delay(user.id)
+            except Exception:
+                pass  # Don't let email failures affect registration
+            
+            return redirect(url_for('auth.login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f'Registration error: {str(e)}')
+            flash('An error occurred during registration. Please try again.', 'error')
     
-    return render_template('auth/register.html', form=form)
+    # Show promo code info if present
+    promo_info = None
+    promo_code_str = session.get('promo_code')
+    if promo_code_str:
+        from app.models import PromoCode
+        promo_code = PromoCode.query.filter_by(code=promo_code_str, is_active=True).first()
+        if promo_code and promo_code.discount_type == 'credits':
+            promo_info = {
+                'code': promo_code.code,
+                'credits': promo_code.discount_value,
+                'campaign': promo_code.campaign
+            }
+    
+    return render_template('auth/register.html', form=form, promo_info=promo_info)
 
 
 @auth.route('/logout')

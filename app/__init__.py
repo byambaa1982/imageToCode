@@ -15,12 +15,23 @@ def create_app(config_name='development'):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     
-    # Reduce logging verbosity (but keep INFO for startup messages)
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.INFO)
-    
-    # Disable SQLAlchemy logging
-    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+    # Optimize logging for performance
+    if config_name == 'production' or not app.debug:
+        # Reduce logging verbosity in production
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.WARNING)
+        
+        # Disable SQLAlchemy logging for performance
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+        logging.getLogger('sqlalchemy.pool').setLevel(logging.WARNING)
+        logging.getLogger('sqlalchemy.dialects').setLevel(logging.WARNING)
+    else:
+        # Keep INFO level for development
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.INFO)
+        
+        # Disable SQLAlchemy logging even in development
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
     
     # Initialize extensions
     db.init_app(app)
@@ -30,13 +41,14 @@ def create_app(config_name='development'):
     mail.init_app(app)
     bcrypt.init_app(app)
     
-    # Initialize database monitoring after db is initialized
-    with app.app_context():
-        from app.database import init_db_monitoring, test_db_connection
-        try:
-            init_db_monitoring()
-        except Exception as e:
-            app.logger.error(f"Failed to initialize database monitoring: {e}")
+    # Initialize database monitoring after db is initialized (only in production)
+    if not app.debug and config_name == 'production':
+        with app.app_context():
+            from app.database import init_db_monitoring, test_db_connection
+            try:
+                init_db_monitoring()
+            except Exception as e:
+                app.logger.error(f"Failed to initialize database monitoring: {e}")
     
     # Configure login manager
     login_manager.login_view = 'auth.login'
@@ -68,6 +80,13 @@ def create_app(config_name='development'):
     
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
+    
+    from app.launch import launch as launch_blueprint
+    app.register_blueprint(launch_blueprint, url_prefix='/launch')
+    
+    # Initialize launch tracking middleware (optimized for performance)
+    from app.launch.middleware_optimized import init_optimized_launch_tracking
+    init_optimized_launch_tracking(app)
     
     # Register health check endpoints
     from app.health import register_health_blueprint

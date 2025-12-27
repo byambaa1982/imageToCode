@@ -423,3 +423,153 @@ class AnalyticsEvent(db.Model):
     
     def __repr__(self):
         return f'<AnalyticsEvent {self.event_type}>'
+
+class PromoCode(db.Model):
+    """Promo code model for launch specials and discounts."""
+    
+    __tablename__ = 'promo_codes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    
+    # Discount details
+    discount_type = db.Column(db.String(20), nullable=False)  # 'credits', 'percentage', 'fixed'
+    discount_value = db.Column(db.Numeric(10, 2), nullable=False)  # Amount or percentage
+    
+    # Usage limits
+    max_uses = db.Column(db.Integer, nullable=True)  # Null = unlimited
+    uses_count = db.Column(db.Integer, default=0)
+    max_uses_per_user = db.Column(db.Integer, default=1)
+    
+    # Validity
+    starts_at = db.Column(db.DateTime, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Campaign tracking
+    campaign = db.Column(db.String(100), nullable=True)  # 'product_hunt', 'reddit', etc.
+    description = db.Column(db.String(255), nullable=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    redemptions = db.relationship('PromoCodeRedemption', backref='promo_code', lazy='dynamic')
+    
+    def __repr__(self):
+        return f'<PromoCode {self.code}>'
+    
+    def is_valid(self, account_id=None):
+        """Check if promo code is valid for use."""
+        now = datetime.utcnow()
+        
+        # Check if active
+        if not self.is_active:
+            return False, "This promo code is no longer active"
+        
+        # Check start date
+        if self.starts_at and now < self.starts_at:
+            return False, "This promo code is not yet active"
+        
+        # Check expiry
+        if self.expires_at and now > self.expires_at:
+            return False, "This promo code has expired"
+        
+        # Check max uses
+        if self.max_uses and self.uses_count >= self.max_uses:
+            return False, "This promo code has reached its usage limit"
+        
+        # Check per-user limit
+        if account_id and self.max_uses_per_user:
+            user_uses = self.redemptions.filter_by(account_id=account_id).count()
+            if user_uses >= self.max_uses_per_user:
+                return False, "You have already used this promo code"
+        
+        return True, None
+    
+    def apply_discount(self, original_amount):
+        """Calculate discounted amount."""
+        if self.discount_type == 'credits':
+            return self.discount_value  # Free credits
+        elif self.discount_type == 'percentage':
+            discount = original_amount * (self.discount_value / 100)
+            return max(0, original_amount - discount)
+        elif self.discount_type == 'fixed':
+            return max(0, original_amount - self.discount_value)
+        return original_amount
+
+
+class PromoCodeRedemption(db.Model):
+    """Track promo code redemptions."""
+    
+    __tablename__ = 'promo_code_redemptions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    promo_code_id = db.Column(db.Integer, db.ForeignKey('promo_codes.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    
+    # Redemption details
+    original_amount = db.Column(db.Numeric(10, 2), nullable=True)
+    discount_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    final_amount = db.Column(db.Numeric(10, 2), nullable=True)
+    
+    # Context
+    context = db.Column(db.String(50), nullable=True)  # 'purchase', 'signup', etc.
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=True)
+    
+    # Tracking
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.Text)
+    
+    # Timestamps
+    redeemed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<PromoCodeRedemption {self.promo_code.code}>'
+
+
+class LaunchMetric(db.Model):
+    """Track launch week metrics."""
+    
+    __tablename__ = 'launch_metrics'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False, index=True)
+    
+    # Traffic metrics
+    unique_visitors = db.Column(db.Integer, default=0)
+    page_views = db.Column(db.Integer, default=0)
+    bounce_rate = db.Column(db.Numeric(5, 2), default=0.00)
+    
+    # Conversion metrics
+    signups = db.Column(db.Integer, default=0)
+    conversions_started = db.Column(db.Integer, default=0)
+    conversions_completed = db.Column(db.Integer, default=0)
+    downloads = db.Column(db.Integer, default=0)
+    
+    # Revenue metrics
+    orders = db.Column(db.Integer, default=0)
+    revenue = db.Column(db.Numeric(10, 2), default=0.00)
+    
+    # Campaign metrics
+    product_hunt_clicks = db.Column(db.Integer, default=0)
+    reddit_clicks = db.Column(db.Integer, default=0)
+    twitter_clicks = db.Column(db.Integer, default=0)
+    promo_code_uses = db.Column(db.Integer, default=0)
+    
+    # Performance metrics
+    avg_response_time = db.Column(db.Numeric(8, 3), default=0.000)
+    error_count = db.Column(db.Integer, default=0)
+    uptime_percentage = db.Column(db.Numeric(5, 2), default=100.00)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        db.Index('idx_date', 'date'),
+    )
+    
+    def __repr__(self):
+        return f'<LaunchMetric {self.date}>'
